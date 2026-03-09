@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic-Tac-Toe Sentinel: Ultimate Edition</title>
+    <title>Tic-Tac-Toe Sentinel Elite</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -50,7 +50,7 @@
             box-shadow: 0 0 10px var(--exclusive); transition: width 1s linear;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        /* ОНЛАЙН ИНТЕРФЕЙС */
         .online-status {
             position: fixed; top: 15px; width: 90%; max-width: 500px;
             display: flex; justify-content: space-between; align-items: center; z-index: 100;
@@ -66,9 +66,8 @@
             background: var(--exclusive); color: white; border: none; cursor: pointer;
             transition: 0.3s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
         }
-        .online-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        /* КОНТЕЙНЕР ИГРЫ */
+        /* ОСНОВНОЙ БЛОК */
         .main-container {
             display: flex; flex-direction: column; align-items: center; gap: 15px;
             width: 100%; max-width: 400px; padding: 20px;
@@ -76,7 +75,7 @@
 
         #turnIndicator {
             font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 2px; color: var(--exclusive); margin-bottom: 5px;
+            letter-spacing: 2px; color: var(--exclusive); margin-bottom: 5px; min-height: 1.2em;
         }
 
         .scoreboard {
@@ -86,12 +85,12 @@
         }
 
         .stat-item { text-align: center; }
-        .stat-label { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; text-transform: uppercase; }
+        .stat-label { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; text-transform: uppercase; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .stat-val { font-size: 1.5rem; font-weight: 800; }
         #scoreX { color: var(--accent-x); text-shadow: var(--shadow-x); }
         #scoreO { color: var(--accent-o); text-shadow: var(--shadow-o); }
 
-        /* СЕЛЕКТОР РЕЖИМОВ */
+        /* ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ */
         .mode-wrapper {
             position: relative; background: var(--surface); height: 48px;
             border-radius: 14px; border: 1px solid var(--border);
@@ -99,17 +98,17 @@
         }
         .mode-tab {
             flex: 1; border: none; background: none; color: rgba(255,255,255,0.2);
-            font-size: 0.65rem; font-weight: 800; cursor: pointer; z-index: 2;
+            font-size: 0.6rem; font-weight: 800; cursor: pointer; z-index: 2;
             text-transform: uppercase; transition: 0.3s;
         }
         .mode-tab.active { color: #fff; }
         .glider {
             position: absolute; height: calc(100% - 10px); top: 5px;
-            background: rgba(255,255,255,0.05); border-radius: 10px;
+            background: rgba(255,255,255,0.07); border-radius: 10px;
             transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1;
         }
 
-        /* ПОЛЕ БОЯ */
+        /* ПОЛЕ ИГРЫ */
         .board-container {
             background: rgba(255,255,255,0.02); padding: 12px; border-radius: 24px;
         }
@@ -120,42 +119,24 @@
         .cell {
             background: var(--surface); border-radius: 16px; border: 1px solid var(--border);
             display: flex; justify-content: center; align-items: center; cursor: pointer;
-            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
         }
         
-        /* Эффекты для ПК */
-        @media (underline: none) and (hover: hover) {
-            .cell:hover:not(.occupied) {
-                background: #1c2128; border-color: #444d56; transform: scale(1.02);
-            }
+        @media (hover: hover) {
+            .cell:hover:not(.occupied) { background: #1c2128; border-color: #444d56; transform: scale(1.02); }
         }
 
-        /* SVG АНИМАЦИИ */
-        svg { width: 65%; height: 65%; fill: none; stroke-width: 10; stroke-linecap: round; }
-        .x-path { stroke: var(--accent-x); filter: drop-shadow(0 0 8px var(--accent-x)); stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw 0.4s ease forwards; }
-        .o-path { stroke: var(--accent-o); filter: drop-shadow(0 0 8px var(--accent-o)); stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 0.5s ease forwards; }
-        @keyframes draw { to { stroke-dashoffset: 0; } }
-
-        /* МОДАЛКИ */
+        /* ОКНА */
         .overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92);
             backdrop-filter: blur(15px); display: none; justify-content: center;
             align-items: center; z-index: 2000; padding: 20px;
         }
-        .overlay.active { display: flex; animation: fadeIn 0.3s ease; }
-        .card {
-            background: var(--surface); padding: 35px; border-radius: 30px;
-            width: 100%; max-width: 340px; text-align: center; border: 1px solid var(--border);
-        }
-        input {
-            background: #0b0e14; border: 1px solid var(--border); color: #fff;
-            padding: 16px; border-radius: 12px; width: 100%; margin: 20px 0;
-            text-align: center; font-size: 1rem;
-        }
-        .primary-btn {
-            background: var(--exclusive); color: #fff; border: none; padding: 16px;
-            border-radius: 14px; width: 100%; font-weight: 800; cursor: pointer;
-        }
+        .overlay.active { display: flex; }
+        .card { background: var(--surface); padding: 35px; border-radius: 30px; width: 100%; max-width: 340px; text-align: center; border: 1px solid var(--border); }
+        
+        input { background: #0b0e14; border: 1px solid var(--border); color: #fff; padding: 16px; border-radius: 12px; width: 100%; margin: 20px 0; text-align: center; font-size: 1rem; }
+        .primary-btn { background: var(--exclusive); color: #fff; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 800; cursor: pointer; }
 
         /* ЭКРАН ПОБЕДЫ */
         .victory-screen {
@@ -164,7 +145,11 @@
         }
         .victory-screen.active { display: flex; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* SVG АНИМАЦИИ */
+        svg { width: 65%; height: 65%; fill: none; stroke-width: 10; stroke-linecap: round; }
+        .x-path { stroke: var(--accent-x); filter: drop-shadow(0 0 8px var(--accent-x)); stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw 0.4s ease forwards; }
+        .o-path { stroke: var(--accent-o); filter: drop-shadow(0 0 8px var(--accent-o)); stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 0.5s ease forwards; }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
     </style>
 </head>
 <body>
@@ -177,7 +162,7 @@
     </div>
 
     <div class="main-container">
-        <div id="turnIndicator">ОЖИДАНИЕ ХОДА</div>
+        <div id="turnIndicator">ВЫБЕРИТЕ РЕЖИМ</div>
 
         <div class="scoreboard">
             <div class="stat-item"><div class="stat-label" id="p1Label">ИГРОК X</div><div class="stat-val" id="scoreX">0</div></div>
@@ -201,26 +186,27 @@
                 <div class="cell" data-idx="6"></div><div class="cell" data-idx="7"></div><div class="cell" data-idx="8"></div>
             </div>
         </div>
-
-        <div style="opacity: 0.2; font-size: 0.6rem; letter-spacing: 2px; cursor: pointer" onclick="resetAll()">ПОЛНЫЙ СБРОС</div>
+        
+        <div style="opacity:0.2; font-size:0.6rem; letter-spacing:2px; cursor:pointer; margin-top:10px" onclick="location.reload()">СБРОСИТЬ ВСЁ</div>
     </div>
 
     <div class="overlay" id="authModal">
         <div class="card">
-            <h2 style="margin:0; color:var(--exclusive)">ONLINE LOBBY</h2>
-            <input type="text" id="nickInput" placeholder="Введите ваш ник" maxlength="12">
-            <button class="primary-btn" onclick="findGame()">НАЙТИ ИГРОКА</button>
-            <p id="searchInfo" style="margin-top:15px; font-size:0.7rem; opacity:0.5"></p>
+            <h2 style="margin:0; color:var(--exclusive)">ВХОД</h2>
+            <input type="text" id="nickInput" placeholder="Ваш ник" maxlength="12">
+            <button class="primary-btn" onclick="findGame()">ИГРАТЬ</button>
+            <p id="searchInfo" style="margin-top:10px; font-size:0.7rem; opacity:0.5"></p>
         </div>
     </div>
 
     <div class="victory-screen" id="vicScreen">
         <div id="vicIcon" style="transform:scale(1.8)"></div>
-        <h1 id="vicText" style="margin-top:50px; letter-spacing:5px; font-weight:200"></h1>
-        <p style="opacity:0.3; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px">Следующий раунд...</p>
+        <h1 id="vicText" style="margin-top:40px; letter-spacing:5px; font-weight:200; text-align:center; padding: 0 20px;"></h1>
+        <p id="vicSub" style="opacity:0.3; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px">Следующий раунд...</p>
     </div>
 
     <script>
+        // Конфигурация Firebase
         const config = {
             apiKey: "AIzaSyBTcH3_tri2L7AHLh1e-YD-0s-QSthuE6Q",
             authDomain: "disk-c98ee.firebaseapp.com",
@@ -241,243 +227,215 @@
         const svgX = `<svg viewBox="0 0 100 100"><path class="x-path" d="M25,25 L75,75 M75,25 L25,75"/></svg>`;
         const svgO = `<svg viewBox="0 0 100 100"><circle class="o-path" cx="50" cy="50" r="35"/></svg>`;
 
-        // ИНИЦИАЛИЗАЦИЯ
         window.onload = () => {
             updateGlider(document.querySelector('.mode-tab.active'));
             const savedRoom = localStorage.getItem('ttt_room');
             if(savedRoom && nick) {
                 gameId = savedRoom; mySym = localStorage.getItem('ttt_sym');
                 startOnline();
-            }
+            } else { updateStatusUI(); }
         };
 
         function updateGlider(btn) {
             const g = document.getElementById('glider');
-            g.style.width = btn.offsetWidth + "px";
-            g.style.left = btn.offsetLeft + "px";
+            g.style.width = btn.offsetWidth + "px"; g.style.left = btn.offsetLeft + "px";
         }
 
-        // ОНЛАЙН ЛОГИКА
+        // ОНЛАЙН СИСТЕМА
         function toggleOnline() {
-            if(isOnline) { if(confirm("Выйти?")) { localStorage.removeItem('ttt_room'); location.reload(); } }
+            if(isOnline) { if(confirm("Выйти из онлайна?")) { localStorage.removeItem('ttt_room'); location.reload(); } }
             else { if(nick) document.getElementById('nickInput').value = nick; document.getElementById('authModal').classList.add('active'); }
         }
 
         function findGame() {
             const val = document.getElementById('nickInput').value.trim();
-            if(!val) return;
-            nick = val; localStorage.setItem('ttt_name', nick);
-            document.getElementById('searchInfo').innerText = "Поиск свободного игрока...";
-            
+            if(!val) return; nick = val; localStorage.setItem('ttt_name', nick);
+            document.getElementById('searchInfo').innerText = "Поиск активных комнат...";
             db.ref('rooms').once('value', s => {
-                let found = false;
-                s.forEach(r => { if(r.val().status === 'waiting' && !found) { found = true; joinRoom(r.key); } });
-                if(!found) createRoom();
+                let f = false; s.forEach(r => { if(r.val().status === 'waiting' && !f) { f = true; joinRoom(r.key); } });
+                if(!f) createRoom();
             });
         }
 
         function createRoom() {
             gameId = db.ref('rooms').push().key; mySym = 'X';
-            db.ref('rooms/' + gameId).set({ p1: nick, p2: "", status: 'waiting', board: Array(9).fill(""), turn: 'X', round: 1, scoreX:0, scoreO:0 });
+            db.ref('rooms/' + gameId).set({ p1: nick, p2: "", status: 'waiting', board: Array(9).fill(""), turn: 'X', round: 1, scoreX:0, scoreO:0, p1_last: Date.now(), p2_last: 0 });
             localStorage.setItem('ttt_room', gameId); localStorage.setItem('ttt_sym', 'X');
             startOnline();
         }
 
         function joinRoom(id) {
             gameId = id; mySym = 'O';
-            db.ref('rooms/' + gameId).update({ p2: nick, status: 'playing' });
+            db.ref('rooms/' + gameId).update({ p2: nick, status: 'playing', p2_last: Date.now() });
             localStorage.setItem('ttt_room', gameId); localStorage.setItem('ttt_sym', 'O');
             startOnline();
         }
 
         function startOnline() {
-            isOnline = true;
-            document.getElementById('authModal').classList.remove('active');
+            isOnline = true; document.getElementById('authModal').classList.remove('active');
             document.getElementById('netLabel').innerText = "ONLINE";
             document.getElementById('netBtn').innerText = "ВЫХОД";
             document.getElementById('modeBox').style.pointerEvents = "none";
             document.getElementById('modeBox').style.opacity = "0.3";
 
+            // Presence (Пинг сервера)
+            setInterval(() => {
+                let up = {}; up[mySym === 'X' ? 'p1_last' : 'p2_last'] = Date.now();
+                db.ref('rooms/' + gameId).update(up);
+            }, 3000);
+
             db.ref('rooms/' + gameId).on('value', s => {
                 const data = s.val(); if(!data) return;
                 
+                // Проверка вылета оппонента
+                const oppLast = mySym === 'X' ? data.p2_last : data.p1_last;
+                if(data.status === 'playing' && oppLast !== 0 && Date.now() - oppLast > 10000 && active) {
+                    db.ref('rooms/' + gameId).update({ winner: mySym, status: 'finished' });
+                    return;
+                }
+
                 document.getElementById('p1Label').innerText = data.p1 || "ОЖИДАНИЕ";
                 document.getElementById('p2Label').innerText = data.p2 || "ПОИСК...";
-                document.getElementById('scoreX').innerText = data.scoreX;
-                document.getElementById('scoreO').innerText = data.scoreO;
-                document.getElementById('roundNum').innerText = data.round;
+                scoreX = data.scoreX; scoreO = data.scoreO; round = data.round;
+                document.getElementById('scoreX').innerText = scoreX;
+                document.getElementById('scoreO').innerText = scoreO;
+                document.getElementById('roundNum').innerText = round;
                 
-                // Синхронизация поля
                 data.board.forEach((v, i) => {
                     const cell = document.querySelector(`[data-idx="${i}"]`);
-                    if(v && !board[i]) {
-                        board[i] = v; cell.innerHTML = v === 'X' ? svgX : svgO; cell.classList.add('occupied');
-                    } else if(!v) {
-                        cell.innerHTML = ""; cell.classList.remove('occupied');
-                    }
+                    if(v && !board[i]) { board[i] = v; cell.innerHTML = (v === 'X' ? svgX : svgO); cell.classList.add('occupied'); }
+                    else if(!v) { cell.innerHTML = ""; cell.classList.remove('occupied'); }
                 });
                 board = data.board.map(v => v === "" ? null : v);
-                turn = data.turn;
+                turn = data.turn; updateStatusUI(); startTimer();
 
-                updateStatusUI();
-                startTimer();
+                // Проверка финала мастером
+                if(mySym === 'X' && active && !data.winner) {
+                    const win = checkWin(board, 'X') ? 'X' : (checkWin(board, 'O') ? 'O' : (board.every(v => v) ? 'draw' : null));
+                    if(win) db.ref('rooms/' + gameId).update({ winner: win });
+                }
                 if(data.winner) showWin(data.winner);
             });
         }
 
-        function updateStatusUI() {
-            const el = document.getElementById('turnIndicator');
-            if(turn === mySym) { el.innerText = "ВАШ ХОД"; el.style.color = "var(--exclusive)"; }
-            else { el.innerText = "ХОД ПРОТИВНИКА"; el.style.color = "rgba(255,255,255,0.2)"; }
-        }
-
-        // ТАЙМЕР
-        function startTimer() {
-            clearInterval(timer); timeLeft = 15;
-            if(!active) return;
-            timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timerFill').style.width = (timeLeft / 15 * 100) + "%";
-                if(timeLeft <= 0) { clearInterval(timer); if(turn === mySym) autoMove(); }
-            }, 1000);
-        }
-
-        function autoMove() {
-            const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if(avail.length > 0) handleMove(avail[Math.floor(Math.random()*avail.length)]);
-        }
-
-        // ХОД ИГРОКА
+        // МЕХАНИКА ХОДА
         function handleMove(i) {
             if(!active || board[i]) return;
-
             if(isOnline) {
                 if(turn !== mySym) return;
-                const nb = board.map(v => v === null ? "" : v);
-                nb[i] = mySym;
+                const nb = board.map(v => v === null ? "" : v); nb[i] = mySym;
                 db.ref('rooms/' + gameId).update({ board: nb, turn: mySym === 'X' ? 'O' : 'X' });
             } else {
-                board[i] = turn;
-                const cell = document.querySelector(`[data-idx="${i}"]`);
-                cell.innerHTML = turn === 'X' ? svgX : svgO;
-                cell.classList.add('occupied');
-
-                if(checkWin(board, turn)) return showWin(turn);
-                if(board.every(v => v)) return showWin('draw');
-
-                turn = turn === 'X' ? 'O' : 'X';
-                if(turn === 'O' && currentMode !== 'pvp') {
-                    active = false;
-                    setTimeout(aiStep, 600);
-                }
+                board[i] = turn; const cell = document.querySelector(`[data-idx="${i}"]`);
+                cell.innerHTML = (turn === 'X' ? svgX : svgO); cell.classList.add('occupied');
+                
+                const win = checkWin(board, turn) ? turn : (board.every(v => v) ? 'draw' : null);
+                if(win) return showWin(win);
+                
+                turn = turn === 'X' ? 'O' : 'X'; updateStatusUI();
+                if(turn === 'O' && currentMode !== 'pvp') { active = false; setTimeout(aiStep, 600); }
             }
         }
 
         function aiStep() {
             let idx;
-            if(currentMode === 'easy') idx = randomIdx();
+            if(currentMode === 'easy') { const a = board.map((v,i)=>v===null?i:null).filter(v=>v!==null); idx = a[Math.floor(Math.random()*a.length)]; }
             else if(currentMode === 'god') idx = antiMinimax(board, 'O').index;
             else idx = minimax(board, 'O').index;
-            
-            active = true;
-            handleMove(idx);
+            active = true; handleMove(idx);
         }
 
-        function randomIdx() {
-            const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            return avail[Math.floor(Math.random() * avail.length)];
-        }
-
-        // ЭКРАН ПОБЕДЫ
+        // ЗАВЕРШЕНИЕ ИГРЫ
         function showWin(p) {
             active = false; clearInterval(timer);
             const screen = document.getElementById('vicScreen');
-            const icon = document.getElementById('vicIcon');
-            const text = document.getElementById('vicText');
-
             screen.classList.add('active');
-            if(p === 'draw') { icon.innerHTML = ""; text.innerText = "НИЧЬЯ"; }
-            else {
-                icon.innerHTML = p === 'X' ? svgX : svgO;
-                if(isOnline) text.innerText = p === mySym ? "ПОБЕДА" : "ПРОИГРЫШ";
-                else if(currentMode === 'god') text.innerText = p === 'X' ? "ТЫ ПРОИГРАЛ" : "ТЫ ПОБЕДИЛ";
-                else text.innerText = p === 'X' ? "ПОБЕДА X" : "ПОБЕДА O";
+            document.getElementById('vicIcon').innerHTML = (p === 'draw' ? "" : (p === 'X' ? svgX : svgO));
+            
+            let msg = "";
+            if(p === 'draw') msg = "НИЧЬЯ";
+            else if(isOnline) {
+                if(p === mySym) msg = "ВЫ ПОБЕДИЛИ!";
+                else msg = "ПРОТИВНИК ПОБЕДИЛ / ВЫШЕЛ";
+            } else {
+                msg = (p === 'X' ? "ПОБЕДА X" : "ПОБЕДА O");
             }
+            document.getElementById('vicText').innerText = msg;
 
             setTimeout(() => {
                 screen.classList.remove('active');
-                if(!isOnline) { resetField(); active = true; }
-                else if(mySym === 'X') {
-                    db.ref('rooms/' + gameId).update({
-                        board: Array(9).fill(""), winner: null, turn: 'X',
-                        round: parseInt(document.getElementById('roundNum').innerText) + 1,
-                        scoreX: p === 'X' ? scoreX + 1 : scoreX,
-                        scoreO: p === 'O' ? scoreO + 1 : scoreO
+                if(!isOnline) {
+                    if(p === 'X') scoreX++; else if(p === 'O') scoreO++;
+                    round++; updateScoresUI(); resetField(); active = true;
+                } else if(mySym === 'X') {
+                    db.ref('rooms/' + gameId).update({ 
+                        board: Array(9).fill(""), winner: null, turn: 'X', 
+                        round: round + 1, 
+                        scoreX: p === 'X' ? scoreX + 1 : scoreX, 
+                        scoreO: p === 'O' ? scoreO + 1 : scoreO 
                     });
                     active = true;
                 } else { active = true; }
-            }, 2500);
+            }, 3000);
         }
 
         // АЛГОРИТМЫ
         function checkWin(b, p) {
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return wins.some(w => w.every(i => b[i] === p));
+            const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            return w.some(s => s.every(i => b[i] === p));
         }
 
         function minimax(nb, p) {
-            const avail = nb.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if(checkWin(nb, 'X')) return { score: -10 };
-            if(checkWin(nb, 'O')) return { score: 10 };
-            if(avail.length === 0) return { score: 0 };
+            const a = nb.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+            if(checkWin(nb, 'X')) return {score:-10}; if(checkWin(nb, 'O')) return {score:10}; if(a.length===0) return {score:0};
             const moves = [];
-            for(let i=0; i<avail.length; i++) {
-                let m = { index: avail[i] }; nb[avail[i]] = p;
-                m.score = minimax(nb, p === 'O' ? 'X' : 'O').score;
-                nb[avail[i]] = null; moves.push(m);
+            for(let i=0; i<a.length; i++) {
+                let m = {index: a[i]}; nb[a[i]] = p; m.score = minimax(nb, p==='O'?'X':'O').score;
+                nb[a[i]] = null; moves.push(m);
             }
-            let best;
-            if(p === 'O') { let bs = -Infinity; moves.forEach((m, i) => { if(m.score > bs) { bs = m.score; best = i; } }); }
-            else { let bs = Infinity; moves.forEach((m, i) => { if(m.score < bs) { bs = m.score; best = i; } }); }
+            let best; if(p==='O') { let s = -Infinity; moves.forEach((m,i)=>{if(m.score>s){s=m.score; best=i;}}); }
+            else { let s = Infinity; moves.forEach((m,i)=>{if(m.score<s){s=m.score; best=i;}}); }
             return moves[best];
         }
 
         function antiMinimax(nb, p) {
-            const avail = nb.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if(checkWin(nb, 'X')) return { score: 10 };
-            if(checkWin(nb, 'O')) return { score: -10 };
-            if(avail.length === 0) return { score: 0 };
+            const a = nb.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+            if(checkWin(nb, 'X')) return {score:10}; if(checkWin(nb, 'O')) return {score:-10}; if(a.length===0) return {score:0};
             const moves = [];
-            for(let i=0; i<avail.length; i++) {
-                let m = { index: avail[i] }; nb[avail[i]] = p;
-                m.score = antiMinimax(nb, p === 'O' ? 'X' : 'O').score;
-                nb[avail[i]] = null; moves.push(m);
+            for(let i=0; i<a.length; i++) {
+                let m = {index: a[i]}; nb[a[i]] = p; m.score = antiMinimax(nb, p==='O'?'X':'O').score;
+                nb[a[i]] = null; moves.push(m);
             }
-            let best;
-            if(p === 'O') { let bs = -Infinity; moves.forEach((m, i) => { if(m.score > bs) { bs = m.score; best = i; } }); }
-            else { let bs = Infinity; moves.forEach((m, i) => { if(m.score < bs) { bs = m.score; best = i; } }); }
+            let best; if(p==='O') { let s = -Infinity; moves.forEach((m,i)=>{if(m.score>s){s=m.score; best=i;}}); }
+            else { let s = Infinity; moves.forEach((m,i)=>{if(m.score<s){s=m.score; best=i;}}); }
             return moves[best];
         }
 
-        function resetField() {
-            board = Array(9).fill(null); turn = 'X';
-            document.querySelectorAll('.cell').forEach(c => { c.innerHTML = ""; c.classList.remove('occupied'); });
+        function updateScoresUI() { document.getElementById('scoreX').innerText = scoreX; document.getElementById('scoreO').innerText = scoreO; document.getElementById('roundNum').innerText = round; }
+        function updateStatusUI() {
+            const el = document.getElementById('turnIndicator');
+            if(isOnline) { el.innerText = (turn === mySym ? "ВАШ ХОД" : "ХОД ПРОТИВНИКА"); el.style.color = (turn === mySym ? "var(--exclusive)" : "rgba(255,255,255,0.2)"); }
+            else { el.innerText = `ХОДИТ ${turn}`; el.style.color = (turn === 'X' ? "var(--accent-x)" : "var(--accent-o)"); }
         }
 
-        function resetAll() { if(!isOnline) location.reload(); }
+        function startTimer() {
+            clearInterval(timer); timeLeft = 15; if(!active) return;
+            timer = setInterval(() => {
+                timeLeft--; document.getElementById('timerFill').style.width = (timeLeft/15*100) + "%";
+                if(timeLeft<=0) { clearInterval(timer); if(isOnline && turn === mySym) autoMove(); }
+            }, 1000);
+        }
 
-        // ИВЕНТЫ
+        function autoMove() { const a = board.map((v,i)=>v===null?i:null).filter(v=>v!==null); if(a.length>0) handleMove(a[Math.floor(Math.random()*a.length)]); }
+        function resetField() { board = Array(9).fill(null); turn = 'X'; document.querySelectorAll('.cell').forEach(c => { c.innerHTML = ""; c.classList.remove('occupied'); }); updateStatusUI(); }
+
         document.querySelectorAll('.cell').forEach(c => c.onclick = () => handleMove(c.dataset.idx));
         document.querySelectorAll('.mode-tab').forEach(t => {
             t.onclick = function() {
                 if(isOnline) return;
                 document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
-                this.classList.add('active'); updateGlider(this);
-                currentMode = this.dataset.mode; resetField();
-                scoreX = 0; scoreO = 0; round = 1;
-                document.getElementById('scoreX').innerText = 0;
-                document.getElementById('scoreO').innerText = 0;
-                document.getElementById('roundNum').innerText = 1;
+                this.classList.add('active'); updateGlider(this); currentMode = this.dataset.mode;
+                scoreX = 0; scoreO = 0; round = 1; updateScoresUI(); resetField();
             };
         });
     </script>
