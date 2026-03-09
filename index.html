@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tic-Tac-Toe Online: Pro Edition</title>
+    <title>Tic-Tac-Toe Sentinel: Ultimate Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
@@ -19,7 +19,7 @@
             --shadow-o: 0 0 20px rgba(255, 0, 122, 0.4);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body {
             margin: 0; padding: 0;
@@ -40,173 +40,188 @@
             z-index: -1;
         }
 
-        /* ОНЛАЙН СТАТУС И ТАЙМЕР */
-        .online-ui {
-            position: fixed; top: 15px; left: 0; right: 0;
-            display: flex; justify-content: space-between; padding: 0 20px;
-            z-index: 100;
-        }
-
-        .timer-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.1);
+        /* ТАЙМЕР */
+        .timer-line {
+            position: fixed; top: 0; left: 0; width: 100%; height: 4px;
+            background: rgba(255,255,255,0.05); z-index: 1000;
         }
         #timerFill {
-            height: 100%; width: 0%; background: var(--exclusive); transition: width 1s linear;
+            height: 100%; width: 0%; background: var(--exclusive);
+            box-shadow: 0 0 10px var(--exclusive); transition: width 1s linear;
         }
 
-        .status-badge {
+        /* ВЕРХНЯЯ ПАНЕЛЬ */
+        .online-status {
+            position: fixed; top: 15px; width: 90%; max-width: 500px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+        }
+
+        .badge {
             background: var(--surface); border: 1px solid var(--border);
-            padding: 8px 15px; border-radius: 12px; font-size: 0.75rem; font-weight: 800;
+            padding: 8px 16px; border-radius: 12px; font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 1px; text-transform: uppercase;
         }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР */
+        .online-btn {
+            background: var(--exclusive); color: white; border: none; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        .online-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        /* КОНТЕЙНЕР ИГРЫ */
         .main-container {
             display: flex; flex-direction: column; align-items: center; gap: 15px;
-            width: 100%; max-width: 500px; padding: 10px;
+            width: 100%; max-width: 400px; padding: 20px;
         }
 
-        .turn-indicator {
-            font-size: 0.9rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-            color: var(--exclusive); height: 20px;
+        #turnIndicator {
+            font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--exclusive); margin-bottom: 5px;
         }
 
-        .header {
-            background: var(--surface); padding: 15px; border-radius: 20px;
+        .scoreboard {
+            background: var(--surface); padding: 15px 25px; border-radius: 20px;
             border: 1px solid var(--border); display: flex; width: 100%;
-            justify-content: space-around; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
-        .stat { text-align: center; }
-        .stat-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.5; margin-bottom: 2px; }
-        .stat-value { font-size: 1.4rem; font-weight: 800; }
+        .stat-item { text-align: center; }
+        .stat-label { font-size: 0.6rem; opacity: 0.5; margin-bottom: 4px; text-transform: uppercase; }
+        .stat-val { font-size: 1.5rem; font-weight: 800; }
         #scoreX { color: var(--accent-x); text-shadow: var(--shadow-x); }
         #scoreO { color: var(--accent-o); text-shadow: var(--shadow-o); }
 
-        /* ВЫБОР РЕЖИМА (АДАПТИВНЫЙ) */
-        .mode-selector {
-            position: relative; background: var(--surface); height: 44px;
-            border-radius: 12px; border: 1px solid var(--border);
+        /* СЕЛЕКТОР РЕЖИМОВ */
+        .mode-wrapper {
+            position: relative; background: var(--surface); height: 48px;
+            border-radius: 14px; border: 1px solid var(--border);
             display: flex; width: 100%; overflow: hidden;
         }
-
-        .mode-btn {
-            position: relative; flex: 1; cursor: pointer; font-size: 0.65rem;
-            font-weight: 800; z-index: 2; transition: 0.3s;
-            color: rgba(230, 237, 243, 0.25); border: none; background: transparent;
-            display: flex; align-items: center; justify-content: center; text-transform: uppercase;
+        .mode-tab {
+            flex: 1; border: none; background: none; color: rgba(255,255,255,0.2);
+            font-size: 0.65rem; font-weight: 800; cursor: pointer; z-index: 2;
+            text-transform: uppercase; transition: 0.3s;
+        }
+        .mode-tab.active { color: #fff; }
+        .glider {
+            position: absolute; height: calc(100% - 10px); top: 5px;
+            background: rgba(255,255,255,0.05); border-radius: 10px;
+            transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1;
         }
 
-        .mode-btn.active { color: #fff; }
-        .mode-glider {
-            position: absolute; height: calc(100% - 8px); background: #2d333b;
-            border-radius: 8px; top: 4px; transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 1; pointer-events: none;
+        /* ПОЛЕ БОЯ */
+        .board-container {
+            background: rgba(255,255,255,0.02); padding: 12px; border-radius: 24px;
         }
-
-        /* ИГРОВОЕ ПОЛЕ */
-        .game-area {
-            position: relative; padding: 10px; background: rgba(48, 54, 61, 0.1); border-radius: 20px;
+        .grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            width: 80vw; height: 80vw; max-width: 320px; max-height: 320px;
         }
-
-        .board {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            width: 85vw; height: 85vw; max-width: 330px; max-height: 330px;
-        }
-
         .cell {
-            background: var(--surface); border-radius: 15px; border: 1px solid var(--border);
+            background: var(--surface); border-radius: 16px; border: 1px solid var(--border);
             display: flex; justify-content: center; align-items: center; cursor: pointer;
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Эффекты для ПК */
+        @media (underline: none) and (hover: hover) {
+            .cell:hover:not(.occupied) {
+                background: #1c2128; border-color: #444d56; transform: scale(1.02);
+            }
         }
 
-        svg { width: 60%; height: 60%; fill: none; stroke-width: 10; stroke-linecap: round; }
+        /* SVG АНИМАЦИИ */
+        svg { width: 65%; height: 65%; fill: none; stroke-width: 10; stroke-linecap: round; }
         .x-path { stroke: var(--accent-x); filter: drop-shadow(0 0 8px var(--accent-x)); stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw 0.4s ease forwards; }
         .o-path { stroke: var(--accent-o); filter: drop-shadow(0 0 8px var(--accent-o)); stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw 0.5s ease forwards; }
         @keyframes draw { to { stroke-dashoffset: 0; } }
 
         /* МОДАЛКИ */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 2000;
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(15px); display: none; justify-content: center;
+            align-items: center; z-index: 2000; padding: 20px;
         }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: var(--surface); padding: 30px; border-radius: 25px;
-            width: 85%; max-width: 350px; text-align: center; border: 1px solid var(--border);
+        .overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        .card {
+            background: var(--surface); padding: 35px; border-radius: 30px;
+            width: 100%; max-width: 340px; text-align: center; border: 1px solid var(--border);
         }
-
         input {
-            background: #0b0e14; border: 1px solid var(--border); color: white;
-            padding: 15px; border-radius: 12px; width: 100%; margin: 20px 0;
-            text-align: center; font-size: 1rem; outline: none;
+            background: #0b0e14; border: 1px solid var(--border); color: #fff;
+            padding: 16px; border-radius: 12px; width: 100%; margin: 20px 0;
+            text-align: center; font-size: 1rem;
+        }
+        .primary-btn {
+            background: var(--exclusive); color: #fff; border: none; padding: 16px;
+            border-radius: 14px; width: 100%; font-weight: 800; cursor: pointer;
         }
 
-        .btn-action {
-            background: var(--exclusive); color: white; border: none; padding: 15px;
-            border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer;
+        /* ЭКРАН ПОБЕДЫ */
+        .victory-screen {
+            position: fixed; inset: 0; background: var(--bg); display: none;
+            flex-direction: column; justify-content: center; align-items: center; z-index: 1500;
         }
+        .victory-screen.active { display: flex; }
 
-        /* ОВЕРЛЕЙ */
-        .win-overlay {
-            position: fixed; inset: 0; background: rgba(11, 14, 20, 0.98);
-            display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .win-overlay.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="timer-container"><div id="timerFill"></div></div>
+    <div class="timer-line"><div id="timerFill"></div></div>
 
-    <div class="online-ui">
-        <div class="status-badge" id="onlineIndicator">OFFLINE</div>
-        <button class="status-badge" style="background:var(--exclusive); color:white; border:none;" onclick="openLogin()" id="mainOnlineBtn">ОНЛАЙН</button>
+    <div class="online-status">
+        <div class="badge" id="netLabel">OFFLINE</div>
+        <button class="badge online-btn" onclick="toggleOnline()" id="netBtn">ОНЛАЙН</button>
     </div>
 
     <div class="main-container">
-        <div class="turn-indicator" id="turnText">КРЕСТИКИ-НОЛИКИ</div>
+        <div id="turnIndicator">ОЖИДАНИЕ ХОДА</div>
 
-        <div class="header drop-anim">
-            <div class="stat"><div class="stat-label" id="labelX">Игрок X</div><div class="stat-value" id="scoreX">0</div></div>
-            <div class="stat"><div class="stat-label">Раунд</div><div class="stat-value" id="roundNum">1</div></div>
-            <div class="stat"><div class="stat-label" id="labelO">Игрок O</div><div class="stat-value" id="scoreO">0</div></div>
+        <div class="scoreboard">
+            <div class="stat-item"><div class="stat-label" id="p1Label">ИГРОК X</div><div class="stat-val" id="scoreX">0</div></div>
+            <div class="stat-item"><div class="stat-label">РАУНД</div><div class="stat-val" id="roundNum">1</div></div>
+            <div class="stat-item"><div class="stat-label" id="p2Label">ИГРОК O</div><div class="stat-val" id="scoreO">0</div></div>
         </div>
 
-        <div class="mode-selector drop-anim" id="modeContainer">
-            <div class="mode-glider" id="glider"></div>
-            <button class="mode-btn active" data-mode="hard">Ultra</button>
-            <button class="mode-btn" data-mode="med">Mid</button>
-            <button class="mode-btn" data-mode="easy">Easy</button>
-            <button class="mode-btn" data-mode="pvp">Друг</button>
-            <button class="mode-btn" data-mode="god">Suicide</button>
+        <div class="mode-wrapper" id="modeBox">
+            <div class="glider" id="glider"></div>
+            <button class="mode-tab active" data-mode="hard">ULTRA</button>
+            <button class="mode-tab" data-mode="med">MID</button>
+            <button class="mode-tab" data-mode="easy">EASY</button>
+            <button class="mode-tab" data-mode="pvp">FRIEND</button>
+            <button class="mode-tab" data-mode="god">SUICIDE</button>
         </div>
 
-        <div class="game-area drop-anim">
-            <div class="board" id="board">
+        <div class="board-container">
+            <div class="grid" id="grid">
                 <div class="cell" data-idx="0"></div><div class="cell" data-idx="1"></div><div class="cell" data-idx="2"></div>
                 <div class="cell" data-idx="3"></div><div class="cell" data-idx="4"></div><div class="cell" data-idx="5"></div>
                 <div class="cell" data-idx="6"></div><div class="cell" data-idx="7"></div><div class="cell" data-idx="8"></div>
             </div>
         </div>
 
-        <div style="opacity:0.3; font-size:0.6rem; letter-spacing:2px;" onclick="hardReset()">СБРОСИТЬ ВСЁ</div>
+        <div style="opacity: 0.2; font-size: 0.6rem; letter-spacing: 2px; cursor: pointer" onclick="resetAll()">ПОЛНЫЙ СБРОС</div>
     </div>
 
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <h3 style="margin:0; color:var(--exclusive)">ВХОД В СЕТЬ</h3>
-            <input type="text" id="usernameInput" placeholder="Введите ваш ник">
-            <button class="btn-action" onclick="startSearch()">Искать игру</button>
-            <p id="searchStatus" style="font-size:0.7rem; opacity:0.5; margin-top:10px;"></p>
+    <div class="overlay" id="authModal">
+        <div class="card">
+            <h2 style="margin:0; color:var(--exclusive)">ONLINE LOBBY</h2>
+            <input type="text" id="nickInput" placeholder="Введите ваш ник" maxlength="12">
+            <button class="primary-btn" onclick="findGame()">НАЙТИ ИГРОКА</button>
+            <p id="searchInfo" style="margin-top:15px; font-size:0.7rem; opacity:0.5"></p>
         </div>
     </div>
 
-    <div class="win-overlay" id="winOverlay">
-        <div id="winIcon" style="transform: scale(1.5);"></div>
-        <div id="winText" style="font-size: 2rem; letter-spacing: 5px; margin: 30px 0; font-weight: 200;">ПОБЕДА</div>
+    <div class="victory-screen" id="vicScreen">
+        <div id="vicIcon" style="transform:scale(1.8)"></div>
+        <h1 id="vicText" style="margin-top:50px; letter-spacing:5px; font-weight:200"></h1>
+        <p style="opacity:0.3; text-transform:uppercase; font-size:0.7rem; letter-spacing:2px">Следующий раунд...</p>
     </div>
 
     <script>
-        const firebaseConfig = {
+        const config = {
             apiKey: "AIzaSyBTcH3_tri2L7AHLh1e-YD-0s-QSthuE6Q",
             authDomain: "disk-c98ee.firebaseapp.com",
             projectId: "disk-c98ee",
@@ -215,223 +230,255 @@
             appId: "1:59577059636:web:e98f456d054cc360747d61",
             databaseURL: "https://disk-c98ee-default-rtdb.firebaseio.com"
         };
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         const db = firebase.database();
 
         let board = Array(9).fill(null);
         let turn = 'X', active = true, scoreX = 0, scoreO = 0, round = 1, currentMode = 'hard';
-        let isOnline = false, mySymbol = null, gameId = null, myName = localStorage.getItem('ttt_nick') || "";
-        let turnTimer = null, timeLeft = 15;
+        let isOnline = false, mySym = null, gameId = null, nick = localStorage.getItem('ttt_name') || "";
+        let timer = null, timeLeft = 15;
 
         const svgX = `<svg viewBox="0 0 100 100"><path class="x-path" d="M25,25 L75,75 M75,25 L25,75"/></svg>`;
         const svgO = `<svg viewBox="0 0 100 100"><circle class="o-path" cx="50" cy="50" r="35"/></svg>`;
 
-        // СИНХРОНИЗАЦИЯ ГЛАЙДЕРА
-        function syncGlider(btn) {
-            const glider = document.getElementById('glider');
-            glider.style.width = `${btn.offsetWidth}px`;
-            glider.style.left = `${btn.offsetLeft}px`;
-        }
-        window.addEventListener('load', () => {
-            syncGlider(document.querySelector('.mode-btn.active'));
-            checkActiveSession();
-        });
-
-        // ПРОВЕРКА СЕССИИ
-        function checkActiveSession() {
-            const savedGame = localStorage.getItem('ttt_gameId');
-            if(savedGame && myName) {
-                gameId = savedGame;
-                mySymbol = localStorage.getItem('ttt_symbol');
-                listenToRoom();
+        // ИНИЦИАЛИЗАЦИЯ
+        window.onload = () => {
+            updateGlider(document.querySelector('.mode-tab.active'));
+            const savedRoom = localStorage.getItem('ttt_room');
+            if(savedRoom && nick) {
+                gameId = savedRoom; mySym = localStorage.getItem('ttt_sym');
+                startOnline();
             }
+        };
+
+        function updateGlider(btn) {
+            const g = document.getElementById('glider');
+            g.style.width = btn.offsetWidth + "px";
+            g.style.left = btn.offsetLeft + "px";
         }
 
-        function openLogin() {
-            if(isOnline) {
-                if(confirm("Выйти из онлайн игры?")) {
-                    localStorage.removeItem('ttt_gameId');
-                    location.reload();
-                }
-                return;
-            }
-            if(myName) document.getElementById('usernameInput').value = myName;
-            document.getElementById('loginModal').classList.add('active');
+        // ОНЛАЙН ЛОГИКА
+        function toggleOnline() {
+            if(isOnline) { if(confirm("Выйти?")) { localStorage.removeItem('ttt_room'); location.reload(); } }
+            else { if(nick) document.getElementById('nickInput').value = nick; document.getElementById('authModal').classList.add('active'); }
         }
 
-        function startSearch() {
-            const val = document.getElementById('usernameInput').value.trim();
-            if(!val) return alert("Введите ник!");
-            myName = val;
-            localStorage.setItem('ttt_nick', myName);
+        function findGame() {
+            const val = document.getElementById('nickInput').value.trim();
+            if(!val) return;
+            nick = val; localStorage.setItem('ttt_name', nick);
+            document.getElementById('searchInfo').innerText = "Поиск свободного игрока...";
             
-            document.getElementById('searchStatus').innerText = "Поиск комнаты...";
-            db.ref('rooms').once('value', snap => {
+            db.ref('rooms').once('value', s => {
                 let found = false;
-                snap.forEach(room => {
-                    if(room.val().status === 'waiting' && !found) {
-                        found = true; joinRoom(room.key);
-                    }
-                });
+                s.forEach(r => { if(r.val().status === 'waiting' && !found) { found = true; joinRoom(r.key); } });
                 if(!found) createRoom();
             });
         }
 
         function createRoom() {
-            gameId = db.ref('rooms').push().key;
-            mySymbol = 'X';
-            db.ref('rooms/' + gameId).set({
-                p1: myName, p2: "", status: 'waiting', board: Array(9).fill(""), turn: 'X', round: 1, scoreX: 0, scoreO: 0, lastMoveTime: Date.now()
-            });
-            saveSession(); listenToRoom();
+            gameId = db.ref('rooms').push().key; mySym = 'X';
+            db.ref('rooms/' + gameId).set({ p1: nick, p2: "", status: 'waiting', board: Array(9).fill(""), turn: 'X', round: 1, scoreX:0, scoreO:0 });
+            localStorage.setItem('ttt_room', gameId); localStorage.setItem('ttt_sym', 'X');
+            startOnline();
         }
 
         function joinRoom(id) {
-            gameId = id;
-            mySymbol = 'O';
-            db.ref('rooms/' + gameId).update({ p2: myName, status: 'playing', lastMoveTime: Date.now() });
-            saveSession(); listenToRoom();
+            gameId = id; mySym = 'O';
+            db.ref('rooms/' + gameId).update({ p2: nick, status: 'playing' });
+            localStorage.setItem('ttt_room', gameId); localStorage.setItem('ttt_sym', 'O');
+            startOnline();
         }
 
-        function saveSession() {
-            localStorage.setItem('ttt_gameId', gameId);
-            localStorage.setItem('ttt_symbol', mySymbol);
-        }
-
-        function listenToRoom() {
+        function startOnline() {
             isOnline = true;
-            document.getElementById('loginModal').classList.remove('active');
-            document.getElementById('onlineIndicator').innerText = "ONLINE";
-            document.getElementById('mainOnlineBtn').innerText = "ВЫЙТИ";
-            document.getElementById('modeContainer').style.opacity = "0.2";
-            document.getElementById('modeContainer').style.pointerEvents = "none";
+            document.getElementById('authModal').classList.remove('active');
+            document.getElementById('netLabel').innerText = "ONLINE";
+            document.getElementById('netBtn').innerText = "ВЫХОД";
+            document.getElementById('modeBox').style.pointerEvents = "none";
+            document.getElementById('modeBox').style.opacity = "0.3";
 
-            db.ref('rooms/' + gameId).on('value', snap => {
-                const data = snap.val();
-                if(!data) return;
-
-                document.getElementById('labelX').innerText = data.p1 || "Поиск...";
-                document.getElementById('labelO').innerText = data.p2 || "Поиск...";
+            db.ref('rooms/' + gameId).on('value', s => {
+                const data = s.val(); if(!data) return;
+                
+                document.getElementById('p1Label').innerText = data.p1 || "ОЖИДАНИЕ";
+                document.getElementById('p2Label').innerText = data.p2 || "ПОИСК...";
                 document.getElementById('scoreX').innerText = data.scoreX;
                 document.getElementById('scoreO').innerText = data.scoreO;
                 document.getElementById('roundNum').innerText = data.round;
                 
-                // Отрисовка поля
+                // Синхронизация поля
                 data.board.forEach((v, i) => {
+                    const cell = document.querySelector(`[data-idx="${i}"]`);
                     if(v && !board[i]) {
-                        board[i] = v;
-                        document.querySelector(`[data-idx="${i}"]`).innerHTML = v === 'X' ? svgX : svgO;
+                        board[i] = v; cell.innerHTML = v === 'X' ? svgX : svgO; cell.classList.add('occupied');
                     } else if(!v) {
-                        document.querySelector(`[data-idx="${i}"]`).innerHTML = "";
+                        cell.innerHTML = ""; cell.classList.remove('occupied');
                     }
                 });
                 board = data.board.map(v => v === "" ? null : v);
                 turn = data.turn;
-                
-                updateTurnText();
-                resetTimer();
 
-                if(data.winner) handleWinner(data.winner);
+                updateStatusUI();
+                startTimer();
+                if(data.winner) showWin(data.winner);
             });
         }
 
-        function updateTurnText() {
-            const el = document.getElementById('turnText');
-            if(turn === mySymbol) {
-                el.innerText = "ВАШ ХОД"; el.style.color = "var(--exclusive)";
-            } else {
-                el.innerText = "ХОДИТ ПРОТИВНИК"; el.style.color = "rgba(255,255,255,0.3)";
-            }
+        function updateStatusUI() {
+            const el = document.getElementById('turnIndicator');
+            if(turn === mySym) { el.innerText = "ВАШ ХОД"; el.style.color = "var(--exclusive)"; }
+            else { el.innerText = "ХОД ПРОТИВНИКА"; el.style.color = "rgba(255,255,255,0.2)"; }
         }
 
-        function resetTimer() {
-            clearInterval(turnTimer);
-            timeLeft = 15;
-            if(!isOnline || !active) return;
-            
-            turnTimer = setInterval(() => {
+        // ТАЙМЕР
+        function startTimer() {
+            clearInterval(timer); timeLeft = 15;
+            if(!active) return;
+            timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timerFill').style.width = (timeLeft / 15 * 100) + "%";
-                if(timeLeft <= 0) {
-                    clearInterval(turnTimer);
-                    if(turn === mySymbol) forceMove();
-                }
+                if(timeLeft <= 0) { clearInterval(timer); if(turn === mySym) autoMove(); }
             }, 1000);
         }
 
-        function forceMove() {
+        function autoMove() {
             const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if(avail.length > 0) executeMove(avail[Math.floor(Math.random() * avail.length)], mySymbol);
+            if(avail.length > 0) handleMove(avail[Math.floor(Math.random()*avail.length)]);
         }
 
-        function executeMove(i, p) {
+        // ХОД ИГРОКА
+        function handleMove(i) {
+            if(!active || board[i]) return;
+
             if(isOnline) {
-                if(turn !== mySymbol || board[i]) return;
+                if(turn !== mySym) return;
                 const nb = board.map(v => v === null ? "" : v);
-                nb[i] = mySymbol;
-                db.ref('rooms/' + gameId).update({ board: nb, turn: mySymbol === 'X' ? 'O' : 'X', lastMoveTime: Date.now() });
-                return;
+                nb[i] = mySym;
+                db.ref('rooms/' + gameId).update({ board: nb, turn: mySym === 'X' ? 'O' : 'X' });
+            } else {
+                board[i] = turn;
+                const cell = document.querySelector(`[data-idx="${i}"]`);
+                cell.innerHTML = turn === 'X' ? svgX : svgO;
+                cell.classList.add('occupied');
+
+                if(checkWin(board, turn)) return showWin(turn);
+                if(board.every(v => v)) return showWin('draw');
+
+                turn = turn === 'X' ? 'O' : 'X';
+                if(turn === 'O' && currentMode !== 'pvp') {
+                    active = false;
+                    setTimeout(aiStep, 600);
+                }
             }
-            // Локальная логика
-            board[i] = p;
-            document.querySelector(`[data-idx="${i}"]`).innerHTML = p === 'X' ? svgX : svgO;
-            if(checkWin(board, p)) return handleWinner(p);
-            if(board.every(v => v)) return handleWinner('draw');
-            turn = turn === 'X' ? 'O' : 'X';
-            if(turn === 'O' && currentMode !== 'pvp') setTimeout(aiAction, 500);
         }
 
-        function handleWinner(p) {
-            active = false; clearInterval(turnTimer);
-            document.getElementById('winOverlay').classList.add('active');
-            document.getElementById('winIcon').innerHTML = (p === 'draw' ? "" : (p === 'X' ? svgX : svgO));
-            document.getElementById('winText').innerText = (p === 'draw' ? "НИЧЬЯ" : (isOnline ? (p === mySymbol ? "ПОБЕДА" : "ПОРАЖЕНИЕ") : "ПОБЕДА"));
+        function aiStep() {
+            let idx;
+            if(currentMode === 'easy') idx = randomIdx();
+            else if(currentMode === 'god') idx = antiMinimax(board, 'O').index;
+            else idx = minimax(board, 'O').index;
+            
+            active = true;
+            handleMove(idx);
+        }
+
+        function randomIdx() {
+            const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            return avail[Math.floor(Math.random() * avail.length)];
+        }
+
+        // ЭКРАН ПОБЕДЫ
+        function showWin(p) {
+            active = false; clearInterval(timer);
+            const screen = document.getElementById('vicScreen');
+            const icon = document.getElementById('vicIcon');
+            const text = document.getElementById('vicText');
+
+            screen.classList.add('active');
+            if(p === 'draw') { icon.innerHTML = ""; text.innerText = "НИЧЬЯ"; }
+            else {
+                icon.innerHTML = p === 'X' ? svgX : svgO;
+                if(isOnline) text.innerText = p === mySym ? "ПОБЕДА" : "ПРОИГРЫШ";
+                else if(currentMode === 'god') text.innerText = p === 'X' ? "ТЫ ПРОИГРАЛ" : "ТЫ ПОБЕДИЛ";
+                else text.innerText = p === 'X' ? "ПОБЕДА X" : "ПОБЕДА O";
+            }
 
             setTimeout(() => {
-                document.getElementById('winOverlay').classList.remove('active');
-                if(!isOnline) { clearField(); active = true; }
-                else if(mySymbol === 'X') {
+                screen.classList.remove('active');
+                if(!isOnline) { resetField(); active = true; }
+                else if(mySym === 'X') {
                     db.ref('rooms/' + gameId).update({
-                        board: Array(9).fill(""), winner: null, turn: 'X', round: parseInt(document.getElementById('roundNum').innerText) + 1,
-                        scoreX: p === 'X' ? scoreX + 1 : scoreX, scoreO: p === 'O' ? scoreO + 1 : scoreO
+                        board: Array(9).fill(""), winner: null, turn: 'X',
+                        round: parseInt(document.getElementById('roundNum').innerText) + 1,
+                        scoreX: p === 'X' ? scoreX + 1 : scoreX,
+                        scoreO: p === 'O' ? scoreO + 1 : scoreO
                     });
                     active = true;
                 } else { active = true; }
             }, 2500);
         }
 
+        // АЛГОРИТМЫ
         function checkWin(b, p) {
             const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
             return wins.some(w => w.every(i => b[i] === p));
         }
 
-        // AI И ПРОЧЕЕ
-        function aiAction() {
-            const avail = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
-            if(avail.length === 0) return;
-            executeMove(avail[0], 'O'); // Упрощено для примера, можно вернуть Minimax
+        function minimax(nb, p) {
+            const avail = nb.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            if(checkWin(nb, 'X')) return { score: -10 };
+            if(checkWin(nb, 'O')) return { score: 10 };
+            if(avail.length === 0) return { score: 0 };
+            const moves = [];
+            for(let i=0; i<avail.length; i++) {
+                let m = { index: avail[i] }; nb[avail[i]] = p;
+                m.score = minimax(nb, p === 'O' ? 'X' : 'O').score;
+                nb[avail[i]] = null; moves.push(m);
+            }
+            let best;
+            if(p === 'O') { let bs = -Infinity; moves.forEach((m, i) => { if(m.score > bs) { bs = m.score; best = i; } }); }
+            else { let bs = Infinity; moves.forEach((m, i) => { if(m.score < bs) { bs = m.score; best = i; } }); }
+            return moves[best];
         }
 
-        function clearField() {
+        function antiMinimax(nb, p) {
+            const avail = nb.map((v, i) => v === null ? i : null).filter(v => v !== null);
+            if(checkWin(nb, 'X')) return { score: 10 };
+            if(checkWin(nb, 'O')) return { score: -10 };
+            if(avail.length === 0) return { score: 0 };
+            const moves = [];
+            for(let i=0; i<avail.length; i++) {
+                let m = { index: avail[i] }; nb[avail[i]] = p;
+                m.score = antiMinimax(nb, p === 'O' ? 'X' : 'O').score;
+                nb[avail[i]] = null; moves.push(m);
+            }
+            let best;
+            if(p === 'O') { let bs = -Infinity; moves.forEach((m, i) => { if(m.score > bs) { bs = m.score; best = i; } }); }
+            else { let bs = Infinity; moves.forEach((m, i) => { if(m.score < bs) { bs = m.score; best = i; } }); }
+            return moves[best];
+        }
+
+        function resetField() {
             board = Array(9).fill(null); turn = 'X';
-            document.querySelectorAll('.cell').forEach(c => c.innerHTML = "");
+            document.querySelectorAll('.cell').forEach(c => { c.innerHTML = ""; c.classList.remove('occupied'); });
         }
 
-        function hardReset() { if(isOnline) return; location.reload(); }
+        function resetAll() { if(!isOnline) location.reload(); }
 
-        document.querySelectorAll('.cell').forEach(c => {
-            c.addEventListener('click', () => executeMove(c.dataset.idx, turn));
-        });
-
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+        // ИВЕНТЫ
+        document.querySelectorAll('.cell').forEach(c => c.onclick = () => handleMove(c.dataset.idx));
+        document.querySelectorAll('.mode-tab').forEach(t => {
+            t.onclick = function() {
                 if(isOnline) return;
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                syncGlider(this);
-                currentMode = this.dataset.mode;
-                clearField();
-            });
+                document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+                this.classList.add('active'); updateGlider(this);
+                currentMode = this.dataset.mode; resetField();
+                scoreX = 0; scoreO = 0; round = 1;
+                document.getElementById('scoreX').innerText = 0;
+                document.getElementById('scoreO').innerText = 0;
+                document.getElementById('roundNum').innerText = 1;
+            };
         });
     </script>
 </body>
