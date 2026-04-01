@@ -1,222 +1,1937 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quick Firebase Chat</title>
-    <style>
-        :root {
-            --primary: #8b5cf6;
-            --bg: #0b0f1a;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #ffffff;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donate Shop</title>
+  <style>
+    :root {
+      --bg-1: #050505;
+      --bg-2: #0d0d0d;
+      --bg-3: #161616;
+      --panel: rgba(20, 20, 20, 0.9);
+      --panel-strong: rgba(10, 10, 10, 0.96);
+      --line: rgba(255, 255, 255, 0.09);
+      --line-strong: rgba(110, 174, 255, 0.3);
+      --text: #f3f3f3;
+      --muted: #aaaaaa;
+      --accent: #ffffff;
+      --accent-2: #d9d9d9;
+      --accent-3: #f1f1f1;
+      --danger: #bdbdbd;
+      --cursor-x: 50%;
+      --cursor-y: 50%;
+      --radius-xl: 30px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.25);
+      --transition: 220ms ease;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    * { box-sizing: border-box; }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-        }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
 
-        #chat-container {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-        }
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.08), transparent 24%),
+        radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.05), transparent 22%),
+        radial-gradient(circle at 50% 120%, rgba(255, 255, 255, 0.05), transparent 26%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2) 42%, var(--bg-3));
+      overflow-x: hidden;
+      position: relative;
+    }
 
-        .header {
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
+    body::selection {
+      background: rgba(255, 255, 255, 0.18);
+    }
 
-        .btn {
-            background: var(--border);
-            border: none;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.2s;
-        }
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 32rem;
+      height: 32rem;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 12s ease-in-out infinite;
+    }
 
-        .btn-primary { background: var(--primary); }
-        .btn-danger { background: #ef4444; }
+    body::before {
+      top: -12rem;
+      right: -8rem;
+      background: rgba(255, 255, 255, 0.08);
+    }
 
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    body::after {
+      left: -8rem;
+      bottom: -14rem;
+      background: rgba(255, 255, 255, 0.05);
+      animation-duration: 15s;
+    }
 
-        .message {
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            border: 1px solid transparent;
-            max-width: 90%;
-            cursor: pointer;
-            user-select: none; /* Предотвращает системное выделение синим */
-            transition: 0.2s;
-            animation: fadeIn 0.3s ease;
-        }
+    body > .light-rays {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .light-rays::before,
+    .light-rays::after {
+      content: "";
+      position: absolute;
+      width: 44rem;
+      height: 120vh;
+      top: -10vh;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 34%, transparent 72%);
+      filter: blur(16px);
+      opacity: 0.28;
+      transform-origin: top center;
+      animation: rayFloat 14s ease-in-out infinite;
+    }
 
-        /* Стиль выделенного сообщения */
-        .message.selected {
-            border-color: var(--primary);
-            background: rgba(139, 92, 246, 0.2);
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
-        }
+    .light-rays::before {
+      left: 8%;
+      transform: rotate(16deg);
+    }
 
-        .input-area {
-            padding: 15px;
-            display: flex;
-            gap: 10px;
-            background: rgba(0,0,0,0.2);
-        }
+    .light-rays::after {
+      right: 6%;
+      transform: rotate(-18deg);
+      animation-duration: 18s;
+      opacity: 0.18;
+    }
 
-        input {
-            flex: 1;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 10px;
-            color: white;
-            outline: none;
-        }
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
 
-        #toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: none;
-            z-index: 100;
-        }
-    </style>
+    .hidden {
+      display: none !important;
+    }
+
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(22px);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(255, 255, 255, 0.12), transparent 26%),
+        linear-gradient(130deg, rgba(255, 255, 255, 0.08), transparent 34%, transparent 66%, rgba(255, 255, 255, 0.05));
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .glass::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: inherit;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1200px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 16px 0 32px;
+    }
+
+    .page::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle 220px at var(--cursor-x) var(--cursor-y), rgba(255, 255, 255, 0.06), transparent 70%),
+        radial-gradient(circle 90px at var(--cursor-x) var(--cursor-y), rgba(255, 255, 255, 0.08), transparent 72%);
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: screen;
+    }
+
+    .app-shell {
+      display: grid;
+      gap: 18px;
+      opacity: 0;
+      transform: translateY(16px) scale(0.985);
+      pointer-events: none;
+      transition: opacity 420ms ease, transform 420ms ease;
+    }
+
+    .app-shell.ready {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .topbar,
+    .brand,
+    .topbar-actions,
+    .main-tabs,
+    .section-head,
+    .stats-row,
+    .mini-actions,
+    .category-tabs,
+    .product-footer,
+    .support-layout,
+    .chat-input-row,
+    .login-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .topbar {
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-radius: 999px;
+      position: sticky;
+      top: 14px;
+      z-index: 10;
+      animation: slideInDown 0.6s ease;
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .brand {
+      align-items: center;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: #050505;
+      background: linear-gradient(135deg, #ffffff, #d9d9d9);
+      box-shadow: 0 14px 34px rgba(255, 255, 255, 0.14);
+      animation: pulseWhite 4.2s ease-in-out infinite;
+    }
+
+    .brand-title {
+      font-size: 1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .brand-sub,
+    .muted,
+    .order-text,
+    .chat-note,
+    .field label {
+      color: var(--muted);
+    }
+
+    .topbar-actions,
+    .main-tabs,
+    .category-tabs,
+    .stats-row,
+    .mini-actions,
+    .login-actions {
+      flex-wrap: wrap;
+    }
+
+    .chip,
+    .tab,
+    .btn,
+    .price-pill,
+    .status-pill,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+    }
+
+    .tab,
+    .btn {
+      cursor: pointer;
+      border: 0;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition), border-color var(--transition);
+    }
+
+    .tab {
+      padding: 11px 16px;
+      font-weight: 800;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab::after {
+      content: "";
+      position: absolute;
+      inset: auto 10px 5px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 260ms ease;
+    }
+
+    .tab:hover,
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tab.active {
+      color: #050505;
+      background: linear-gradient(135deg, var(--accent), #d8d8d8);
+      border-color: transparent;
+    }
+
+    .tab.active::after {
+      transform: scaleX(1);
+      background: rgba(4, 17, 29, 0.26);
+    }
+
+    .btn {
+      padding: 13px 18px;
+      font-weight: 900;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .btn-primary {
+      color: #050505;
+      background: linear-gradient(135deg, var(--accent), #d9d9d9);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .app-frame {
+      position: relative;
+      min-height: calc(100vh - 140px);
+    }
+
+    .view {
+      display: none;
+      animation: viewIn 0.55s cubic-bezier(.2,.7,.2,1);
+    }
+
+    .view.active {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-grid,
+    .products-layout,
+    .support-layout {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-grid {
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+
+    .products-layout {
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: start;
+    }
+
+    .support-layout {
+      grid-template-columns: 0.94fr 1.06fr;
+      align-items: start;
+    }
+
+    .panel,
+    .product-card,
+    .orders-panel,
+    .chat-panel,
+    .side-panel,
+    .login-card,
+    .login-showcase {
+      border-radius: var(--radius-xl);
+      padding: 24px;
+    }
+
+    .panel,
+    .side-panel,
+    .orders-panel,
+    .chat-panel,
+    .login-card,
+    .login-showcase {
+      display: grid;
+      gap: 16px;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .section-head {
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 4.8rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+      max-width: 10ch;
+    }
+
+    h2 {
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      letter-spacing: -0.03em;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stat-card,
+    .mini-card,
+    .order-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 16px 34px rgba(0, 0, 0, 0.2);
+      transform: translateY(18px);
+      opacity: 0;
+      animation: riseUp 0.7s forwards;
+    }
+
+    .stat-card:nth-child(2),
+    .mini-card:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+
+    .stat-card:nth-child(3),
+    .mini-card:nth-child(3) {
+      animation-delay: 0.16s;
+    }
+
+    .stat-big {
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      padding: 18px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top, rgba(73, 169, 255, 0.2), transparent 22%),
+        linear-gradient(135deg, rgba(3, 7, 18, 0.96), rgba(5, 15, 28, 0.96));
+      transition: opacity 420ms ease, visibility 420ms ease;
+    }
+
+    .login-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .login-layout {
+      width: min(640px, 100%);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      animation: zoomFade 0.6s cubic-bezier(.2,.7,.2,1);
+    }
+
+    .login-card h1 {
+      max-width: 12ch;
+    }
+
+    .login-showcase {
+      display: none;
+    }
+
+    .login-showcase::before {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      background: conic-gradient(from 0deg, transparent, rgba(61, 240, 189, 0.28), transparent, rgba(73, 169, 255, 0.36), transparent);
+      animation: rotateRing 9s linear infinite;
+    }
+
+    .login-showcase::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: inherit;
+      background:
+        linear-gradient(180deg, rgba(8, 20, 38, 0.96), rgba(6, 16, 30, 0.96));
+    }
+
+    .showcase-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 16px;
+    }
+
+    .showcase-lines {
+      display: grid;
+      gap: 12px;
+    }
+
+    .showcase-line {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(61, 240, 189, 0.18), rgba(73, 169, 255, 0.58), rgba(255, 215, 108, 0.2));
+      background-size: 220% 100%;
+      animation: shimmer 3.2s linear infinite;
+    }
+
+    .showcase-line:nth-child(2) { width: 78%; animation-delay: 0.15s; }
+    .showcase-line:nth-child(3) { width: 62%; animation-delay: 0.3s; }
+    .showcase-line:nth-child(4) { width: 88%; animation-delay: 0.45s; }
+
+    .field {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 14px 16px;
+      outline: none;
+      resize: vertical;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      transform: translateY(-1px);
+      border-color: rgba(61, 240, 189, 0.34);
+      box-shadow: 0 0 0 4px rgba(61, 240, 189, 0.08);
+    }
+
+    .tag {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .status-pill {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f3f3f3;
+      font-size: 0.84rem;
+      font-weight: 800;
+      line-height: 1.35;
+      text-align: center;
+      white-space: normal;
+    }
+
+    .price-pill {
+      padding: 8px 12px;
+      color: #050505;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-3), #dcdcdc);
+    }
+
+    .product-list,
+    .orders-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .product-list {
+      grid-template-columns: repeat(2, 1fr);
+      align-items: stretch;
+    }
+
+    .product-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 250px;
+      display: grid;
+      gap: 14px;
+      cursor: pointer;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--panel);
+      transform: translateY(22px) scale(0.985);
+      opacity: 0;
+      animation: cardReveal 0.6s forwards;
+      transition: transform 260ms ease, border-color 260ms ease, box-shadow 260ms ease, background 260ms ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      border-color: rgba(255, 255, 255, 0.24);
+      box-shadow:
+        0 26px 60px rgba(0, 0, 0, 0.32),
+        0 0 24px rgba(255, 255, 255, 0.08);
+    }
+
+    .product-card:nth-child(2) { animation-delay: 0.08s; }
+    .product-card:nth-child(3) { animation-delay: 0.16s; }
+    .product-card:nth-child(4) { animation-delay: 0.24s; }
+
+    .product-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -18% -35% auto;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
+    }
+
+    .product-card .eyebrow,
+    .product-card h3,
+    .product-card p,
+    .product-card .product-footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    .product-card.active {
+      border-color: rgba(255, 255, 255, 0.34);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), var(--shadow);
+      transform: translateY(-4px) scale(1.01);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+        var(--panel);
+    }
+
+    .product-card h3 {
+      font-size: 1.2rem;
+    }
+
+    .product-card .muted {
+      line-height: 1.6;
+    }
+
+    .about-panel {
+      text-align: center;
+      align-content: center;
+    }
+
+    .about-panel .eyebrow,
+    .about-panel .mini-card {
+      margin-inline: auto;
+    }
+
+    .about-grid {
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+    }
+
+    .about-grid .mini-card {
+      width: min(100%, 420px);
+    }
+
+    .select-product-btn {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .product-footer {
+      justify-content: stretch;
+      align-items: stretch;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .product-footer .status-pill,
+    .product-footer .price-pill {
+      width: 100%;
+      min-height: 48px;
+    }
+
+    .side-panel {
+      position: sticky;
+      top: 100px;
+    }
+
+    .side-panel .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .side-panel .mini-card {
+      min-width: 0;
+    }
+
+    .side-panel .price-pill,
+    .side-panel .status-pill {
+      width: 100%;
+      min-height: 54px;
+      padding-inline: 14px;
+    }
+
+    .main-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, max-content));
+      justify-content: start;
+      align-items: center;
+    }
+
+    .main-tabs .tab {
+      min-width: 0;
+      padding-inline: 18px;
+    }
+
+    .category-tabs {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: min(100%, 240px);
+    }
+
+    .category-tabs .tab {
+      width: 100%;
+      min-width: 0;
+      justify-content: center;
+      text-align: center;
+      white-space: normal;
+      line-height: 1.25;
+    }
+
+    .orders-panel,
+    .chat-panel {
+      min-height: 560px;
+    }
+
+    .order-card {
+      display: grid;
+      gap: 10px;
+      transition: transform var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .order-card.active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.24);
+      transform: translateY(-2px);
+    }
+
+    .chat-panel {
+      align-content: start;
+    }
+
+    .chat-box {
+      min-height: 350px;
+      max-height: 350px;
+      overflow: auto;
+      padding: 14px;
+      border-radius: 22px;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      gap: 12px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .bubble {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 18px;
+      line-height: 1.5;
+      animation: bubbleIn 0.28s ease;
+    }
+
+    .bubble.user {
+      margin-left: auto;
+      border-bottom-right-radius: 6px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(190, 190, 190, 0.54));
+      color: #050505;
+    }
+
+    .bubble.admin {
+      border-bottom-left-radius: 6px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .bubble-meta {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .chat-input-row {
+      align-items: end;
+    }
+
+    .chat-input-row .field {
+      flex: 1;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      border-radius: 22px;
+      color: var(--muted);
+    }
+
+    .toast-wrap {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      display: grid;
+      gap: 10px;
+      width: min(360px, calc(100% - 24px));
+    }
+
+    .toast {
+      padding: 15px 16px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow);
+      animation: toastIn 0.28s ease;
+      transform-origin: right bottom;
+      backdrop-filter: blur(18px);
+    }
+
+    .toast.toast-hide {
+      animation: toastOut 0.42s ease forwards;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(0, 28px, 0) scale(1.04); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 220% 50%; }
+    }
+
+    @keyframes rotateRing {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseWhite {
+      0%, 100% { box-shadow: 0 14px 34px rgba(255, 255, 255, 0.14); }
+      50% { box-shadow: 0 16px 40px rgba(255, 255, 255, 0.24), 0 0 24px rgba(255, 255, 255, 0.1); }
+    }
+
+    @keyframes rayFloat {
+      0%, 100% { opacity: 0.16; transform: translateY(0) rotate(16deg) scaleX(1); }
+      50% { opacity: 0.3; transform: translateY(18px) rotate(12deg) scaleX(1.06); }
+    }
+
+    @keyframes viewIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes slideInDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes riseUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardReveal {
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes bubbleIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.96); filter: blur(8px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      to { opacity: 0; transform: translateY(-6px) scale(0.96); filter: blur(10px); }
+    }
+
+    @keyframes zoomFade {
+      from { opacity: 0; transform: scale(0.97) translateY(14px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @media (max-width: 1020px) {
+      .hero-grid,
+      .products-layout,
+      .support-layout,
+      .login-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100% - 16px, 100%);
+        padding-top: 10px;
+        padding-bottom: 18px;
+      }
+
+      .topbar {
+        border-radius: 28px;
+        padding: 14px;
+        gap: 10px;
+        position: static;
+      }
+
+      .brand {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+      }
+
+      .brand-title {
+        font-size: 0.92rem;
+      }
+
+      .brand-sub {
+        font-size: 0.88rem;
+        line-height: 1.35;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 10vw, 3rem);
+      }
+
+      h2 {
+        font-size: clamp(1.4rem, 7vw, 1.9rem);
+      }
+
+      .panel,
+      .product-card,
+      .orders-panel,
+      .chat-panel,
+      .side-panel,
+      .login-card,
+      .login-showcase {
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .stats-row,
+      .product-list {
+        grid-template-columns: 1fr;
+      }
+
+      .main-tabs {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .main-tabs .tab,
+      .category-tabs .tab,
+      .btn {
+        min-height: 52px;
+      }
+
+      .category-tabs {
+        width: 100%;
+      }
+
+      .section-head {
+        gap: 14px;
+      }
+
+      .mini-actions,
+      .chat-input-row,
+      .topbar-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .product-footer {
+        flex-direction: column;
+      }
+
+      .field input,
+      .field textarea {
+        font-size: 16px;
+      }
+
+      .side-panel .price-pill,
+      .side-panel .status-pill,
+      .product-footer .status-pill,
+      .select-product-btn {
+        min-height: 52px;
+      }
+
+      .orders-panel,
+      .chat-panel {
+        min-height: auto;
+      }
+
+      .chat-box {
+        min-height: 300px;
+        max-height: 300px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        width: calc(100% - 12px);
+      }
+
+      .topbar,
+      .panel,
+      .product-card,
+      .orders-panel,
+      .chat-panel,
+      .side-panel,
+      .login-card {
+        border-radius: 20px;
+      }
+
+      .topbar,
+      .panel,
+      .product-card,
+      .orders-panel,
+      .chat-panel,
+      .side-panel,
+      .login-card,
+      .login-showcase {
+        padding: 16px;
+      }
+
+      .bubble {
+        max-width: 94%;
+      }
+
+      .chat-box {
+        min-height: 260px;
+        max-height: 260px;
+      }
+
+      .light-rays::before,
+      .light-rays::after {
+        width: 28rem;
+        opacity: 0.14;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="light-rays"></div>
+  <div class="login-screen" id="loginScreen">
+    <div class="login-layout">
+      <section class="login-card glass">
+        <div class="eyebrow">Вход</div>
+        <h1>Введите свой ID, чтобы открыть сайт.</h1>
+        <p class="muted">После первого входа ID сохранится в браузере, и в следующий раз сразу откроется главное меню.</p>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-big">Быстро</div>
+            <div class="muted">Нужно только ввести ID</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-big">Удобно</div>
+            <div class="muted">Сайт сам запомнит вход</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-big">Понятно</div>
+            <div class="muted">После оплаты откроется чат</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="gateIdInput">Ваш ID</label>
+          <input id="gateIdInput" maxlength="24" placeholder="Например: 123456 или gamer01" />
+        </div>
+        <div class="login-actions">
+          <button class="btn btn-primary" id="enterSiteBtn">Войти и запомнить ID</button>
+        </div>
+      </section>
 
-    <div id="toast">Текст скопирован!</div>
-
-    <div id="chat-container">
-        <header class="header">
-            <span>Чат 123</span>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn" id="copy-selected">Скопировать</button>
-                <button class="btn btn-danger" id="clear-all">Очистить</button>
+      <aside class="login-showcase glass">
+        <div class="showcase-inner">
+          <div class="eyebrow">Что внутри</div>
+          <h2>Отдельные экраны вместо одного длинного сайта.</h2>
+          <div class="stats-row">
+            <div class="mini-card">
+              <strong>Главная</strong>
+              <div class="muted">Статус, быстрые действия и обзор</div>
             </div>
-        </header>
-
-        <div id="messages"></div>
-
-        <form class="input-area" id="chat-form">
-            <input type="text" id="msg-input" placeholder="Двойной клик на текст для выбора..." required>
-            <button type="submit" class="btn btn-primary">Отправить</button>
-        </form>
+            <div class="mini-card">
+              <strong>Товары</strong>
+              <div class="muted">Категории по играм и сервисам</div>
+            </div>
+            <div class="mini-card">
+              <strong>Поддержка</strong>
+              <div class="muted">Отдельные чаты по каждому заказу</div>
+            </div>
+          </div>
+          <div class="showcase-lines">
+            <div class="showcase-line"></div>
+            <div class="showcase-line"></div>
+            <div class="showcase-line"></div>
+            <div class="showcase-line"></div>
+          </div>
+          <div class="mini-actions">
+            <span class="tag">Roblox</span>
+            <span class="tag">PUBG</span>
+            <span class="tag">Standoff 2</span>
+            <span class="tag">Telegram</span>
+          </div>
+        </div>
+      </aside>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, onValue, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  <div class="page">
+    <div class="app-shell" id="appShell">
+      <header class="topbar glass">
+        <div class="brand">
+          <div class="brand-mark">DS</div>
+          <div>
+            <div class="brand-title">Donate Shop</div>
+            <div class="brand-sub">Донат и игровые покупки под заказ</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-pill" id="savedIdBadge">ID не сохранен</span>
+          <button class="btn btn-danger hidden" id="resetIdBtn">Сбросить ID</button>
+        </div>
+      </header>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBTcH3_tri2L7AHLh1e-YD-0s-QSthuE6Q",
-            authDomain: "disk-c98ee.firebaseapp.com",
-            projectId: "disk-c98ee",
-            storageBucket: "disk-c98ee.appspot.com",
-            messagingSenderId: "59577059636",
-            appId: "1:59577059636:web:e98f456d054cc360747d61",
-            databaseURL: "https://disk-c98ee-default-rtdb.firebaseio.com"
+      <nav class="main-tabs" id="mainTabs">
+        <button class="tab active" data-view="home">Главная</button>
+        <button class="tab" data-view="products">Товары</button>
+        <button class="tab" data-view="support">Поддержка</button>
+      </nav>
+
+      <main class="app-frame">
+        <section class="view active" id="view-home">
+          <div class="hero-grid">
+            <article class="panel glass">
+              <div class="eyebrow">Главная</div>
+              <h1>Выберите раздел и быстро оформите нужную покупку.</h1>
+              <p class="muted">После входа открывается понятное меню: отдельная главная, отдельный раздел товаров и отдельный раздел поддержки.</p>
+              <div class="stats-row">
+                <div class="stat-card">
+                  <div class="stat-big" id="homeOrdersCount">0</div>
+                  <div class="muted">Ваших заказов</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-big" id="homeCurrentCategory">Roblox</div>
+                  <div class="muted">Категория товаров</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-big" id="homeChatState">Нет чата</div>
+                  <div class="muted">Статус поддержки</div>
+                </div>
+              </div>
+              <div class="mini-actions">
+                <button class="btn btn-primary" data-open-view="products">Открыть товары</button>
+                <button class="btn btn-secondary" data-open-view="support">Открыть поддержку</button>
+              </div>
+            </article>
+
+            <aside class="panel glass about-panel">
+              <div class="eyebrow">О нас</div>
+              <h2>Venus Donate</h2>
+              <div class="muted">Сервис покупки доната и игровых товаров с поддержкой через чат.</div>
+              <div class="about-grid">
+                <div class="mini-card">
+                  <strong>Telegram</strong>
+                  <div class="muted">venuzp</div>
+                </div>
+                <div class="mini-card">
+                  <strong>Карта для оплаты</strong>
+                  <div class="muted">9860046603625198</div>
+                </div>
+                <div class="mini-card">
+                  <strong>Что доступно</strong>
+                  <div class="muted">Roblox, PUBG, Standoff 2, Telegram и другие покупки под заказ.</div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-products">
+          <div class="products-layout">
+            <article class="panel glass">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Товары</div>
+                  <h2>Сначала открой категорию, потом выбери нужный товар</h2>
+                </div>
+                <div class="category-tabs" id="categoryTabs"></div>
+              </div>
+              <div class="product-list" id="productsList"></div>
+            </article>
+
+            <aside class="side-panel glass">
+              <div class="eyebrow">Покупка</div>
+              <h3 id="selectedTitle">Сначала выберите товар слева</h3>
+              <p class="muted" id="selectedDesc">Когда вы нажмете кнопку выбора, здесь появятся данные о товаре и оформление заказа.</p>
+              <div class="stats-row">
+                <div class="mini-card">
+                  <div class="price-pill" id="selectedPrice">Цена уточняется</div>
+                  <div class="muted">Стоимость</div>
+                </div>
+                <div class="mini-card">
+                  <div class="status-pill" id="selectedCategory">Категория</div>
+                  <div class="muted">Раздел товара</div>
+                </div>
+                <div class="mini-card">
+                  <div class="status-pill" id="selectedAvailability">Готово</div>
+                  <div class="muted">Статус заказа</div>
+                </div>
+              </div>
+              <div class="field">
+                <label for="orderNoteInput">Детали для покупки</label>
+                <textarea id="orderNoteInput" rows="5" placeholder="Например: ник, сервер, UID, логин или что именно нужно купить"></textarea>
+              </div>
+              <div class="mini-actions">
+                <button class="btn btn-primary" id="buyBtn">Купить и открыть чат</button>
+                <button class="btn btn-secondary" data-open-view="support">Перейти в поддержку</button>
+              </div>
+              <p class="chat-note">Актуальную цену вы можете узнать в чате с админом после выбора товара.</p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-support">
+          <div class="support-layout">
+            <article class="orders-panel glass">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Поддержка</div>
+                  <h2 id="ordersTitle">Мои чаты</h2>
+                </div>
+                <span class="status-pill" id="supportModeBadge">Режим клиента</span>
+              </div>
+              <div class="orders-list" id="ordersList"></div>
+            </article>
+
+            <article class="chat-panel glass">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Чат</div>
+                  <h3 id="chatTitle">Чат откроется после оплаты</h3>
+                </div>
+                <span class="status-pill" id="chatStatus">Нет активного заказа</span>
+              </div>
+              <div class="chat-box" id="chatMessages">
+                <div class="chat-note">Сначала оформи покупку, и здесь появится чат с поддержкой.</div>
+              </div>
+              <div class="chat-input-row">
+                <div class="field">
+                  <label for="chatInput">Сообщение</label>
+                  <textarea id="chatInput" rows="3" placeholder="Напиши вопрос или детали по заказу"></textarea>
+                </div>
+                <button class="btn btn-primary" id="sendBtn">Отправить</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer glass">
+        <span>Первый вход обязателен, дальше ID берется из браузера.</span>
+        <span>После покупки заказ сразу открывает отдельный чат.</span>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    const STORAGE_KEY = "donate-shop-v3";
+    const SECRET_ADMIN_ID = "7711";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTcH3_tri2L7AHLh1e-YD-0s-QSthuE6Q",
+      authDomain: "disk-c98ee.firebaseapp.com",
+      databaseURL: "https://disk-c98ee-default-rtdb.firebaseio.com",
+      projectId: "disk-c98ee",
+      storageBucket: "disk-c98ee.firebasestorage.app",
+      messagingSenderId: "59577059636",
+      appId: "1:59577059636:web:e98f456d054cc360747d61"
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const database = getDatabase(firebaseApp);
+
+    const catalog = {
+      roblox: [
+        { id: "rbx-1", title: "Roblox 400 Robux", price: 59000, desc: "Пополнение Robux на аккаунт." },
+        { id: "rbx-2", title: "Roblox Premium", price: 139000, desc: "Покупка Premium на месяц." }
+      ],
+      pubg: [
+        { id: "pubg-1", title: "PUBG UC 325", price: 64000, desc: "UC для мобильной версии PUBG." },
+        { id: "pubg-2", title: "PUBG Royale Pass", price: 159000, desc: "Активация сезонного пропуска." }
+      ],
+      standoff: [
+        { id: "stf-1", title: "Standoff 2 Gold", price: 47000, desc: "Пополнение Gold на аккаунт." },
+        { id: "stf-2", title: "Standoff 2 Battle Pass", price: 98000, desc: "Покупка боевого пропуска." }
+      ],
+      telegram: [
+        { id: "tg-1", title: "Telegram Premium", price: 69000, desc: "Оформление Telegram Premium." },
+        { id: "tg-2", title: "Telegram Stars", price: 52000, desc: "Покупка Stars для аккаунта." }
+      ]
+    };
+
+    const categoryLabels = {
+      roblox: "Донат в Roblox",
+      pubg: "Донат в PUBG",
+      standoff: "Донат в Standoff 2",
+      telegram: "Товары для Telegram"
+    };
+
+    const ui = {
+      loginScreen: document.getElementById("loginScreen"),
+      appShell: document.getElementById("appShell"),
+      gateIdInput: document.getElementById("gateIdInput"),
+      enterSiteBtn: document.getElementById("enterSiteBtn"),
+      resetIdBtn: document.getElementById("resetIdBtn"),
+      savedIdBadge: document.getElementById("savedIdBadge"),
+      mainTabs: document.getElementById("mainTabs"),
+      categoryTabs: document.getElementById("categoryTabs"),
+      productsList: document.getElementById("productsList"),
+      selectedTitle: document.getElementById("selectedTitle"),
+      selectedDesc: document.getElementById("selectedDesc"),
+      selectedPrice: document.getElementById("selectedPrice"),
+      selectedCategory: document.getElementById("selectedCategory"),
+      selectedAvailability: document.getElementById("selectedAvailability"),
+      orderNoteInput: document.getElementById("orderNoteInput"),
+      buyBtn: document.getElementById("buyBtn"),
+      ordersTitle: document.getElementById("ordersTitle"),
+      supportModeBadge: document.getElementById("supportModeBadge"),
+      ordersList: document.getElementById("ordersList"),
+      chatTitle: document.getElementById("chatTitle"),
+      chatStatus: document.getElementById("chatStatus"),
+      chatMessages: document.getElementById("chatMessages"),
+      chatInput: document.getElementById("chatInput"),
+      sendBtn: document.getElementById("sendBtn"),
+      homeOrdersCount: document.getElementById("homeOrdersCount"),
+      homeCurrentCategory: document.getElementById("homeCurrentCategory"),
+      homeChatState: document.getElementById("homeChatState"),
+      toastWrap: document.getElementById("toastWrap")
+    };
+
+    let state = loadState();
+    let currentView = "home";
+    let activeCategory = state.activeCategory || "roblox";
+    let selectedProduct = findProductById(state.selectedProductId) || catalog[activeCategory][0];
+    let ordersUnsubscribe = null;
+    let chatUnsubscribe = null;
+    let firebaseReady = true;
+
+    bindEvents();
+    renderCategoryTabs();
+    renderProducts();
+    renderSelectedProduct();
+    hydrateAccess();
+    hydrateHeader();
+    hydrateHome();
+    renderOrders();
+    renderCurrentChat();
+    startOrdersSync();
+
+    function bindEvents() {
+      window.addEventListener("pointermove", (event) => {
+        document.documentElement.style.setProperty("--cursor-x", `${event.clientX}px`);
+        document.documentElement.style.setProperty("--cursor-y", `${event.clientY}px`);
+      });
+
+      ui.enterSiteBtn.addEventListener("click", enterSite);
+      ui.resetIdBtn.addEventListener("click", resetId);
+      ui.buyBtn.addEventListener("click", createOrder);
+      ui.sendBtn.addEventListener("click", sendMessage);
+      ui.gateIdInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          enterSite();
+        }
+      });
+
+      ui.mainTabs.querySelectorAll("[data-view]").forEach((button) => {
+        button.addEventListener("click", () => switchView(button.dataset.view));
+      });
+
+      document.querySelectorAll("[data-open-view]").forEach((button) => {
+        button.addEventListener("click", () => switchView(button.dataset.openView));
+      });
+    }
+
+    function hydrateAccess() {
+      const hasUser = Boolean(state.userId);
+      ui.loginScreen.classList.toggle("hidden", hasUser);
+      ui.appShell.classList.toggle("ready", hasUser);
+      ui.resetIdBtn.classList.toggle("hidden", !hasUser);
+      if (hasUser) {
+        ui.gateIdInput.value = state.userId;
+      }
+    }
+
+    function hydrateHeader() {
+      ui.savedIdBadge.textContent = state.userId ? `ID: ${state.userId}` : "ID не сохранен";
+      ui.ordersTitle.textContent = isAdmin() ? "Чаты клиентов" : "Мои чаты";
+      ui.supportModeBadge.textContent = isAdmin() ? "Режим поддержки" : "Режим клиента";
+    }
+
+    function hydrateHome() {
+      const orders = getVisibleOrders();
+      ui.homeOrdersCount.textContent = String(orders.length);
+      ui.homeCurrentCategory.textContent = shortCategoryName(activeCategory);
+      ui.homeChatState.textContent = getCurrentChatId() ? "Открыт" : "Нет чата";
+    }
+
+    function switchView(viewId) {
+      currentView = viewId;
+      document.querySelectorAll(".view").forEach((view) => {
+        view.classList.toggle("active", view.id === `view-${viewId}`);
+      });
+      ui.mainTabs.querySelectorAll("[data-view]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === viewId);
+      });
+    }
+
+    function enterSite() {
+      const userId = ui.gateIdInput.value.trim();
+      if (!userId) {
+        showToast("Нужен ID", "Введите ваш ID, чтобы открыть сайт.");
+        return;
+      }
+
+      state.userId = userId;
+      saveState();
+      hydrateAccess();
+      hydrateHeader();
+      hydrateHome();
+      startOrdersSync();
+      renderOrders();
+      renderCurrentChat();
+      showToast("Вход выполнен", `ID ${userId} сохранен в браузере.`);
+    }
+
+    function resetId() {
+      state.userId = "";
+      state.activeOrderId = "";
+      state.adminSelectedOrderId = "";
+      saveState();
+      hydrateAccess();
+      hydrateHeader();
+      hydrateHome();
+      stopOrdersSync();
+      renderOrders();
+      renderCurrentChat();
+      ui.gateIdInput.value = "";
+      showToast("ID сброшен", "Для входа снова потребуется ввести ID.");
+    }
+
+    function renderCategoryTabs() {
+      ui.categoryTabs.innerHTML = "";
+      Object.keys(catalog).forEach((category) => {
+        const button = document.createElement("button");
+        button.className = `tab${category === activeCategory ? " active" : ""}`;
+        button.textContent = categoryLabels[category];
+        button.addEventListener("click", () => {
+          activeCategory = category;
+          state.activeCategory = category;
+          saveState();
+          hydrateHome();
+          renderCategoryTabs();
+          renderProducts();
+        });
+        ui.categoryTabs.appendChild(button);
+      });
+    }
+
+    function renderProducts() {
+      ui.productsList.innerHTML = "";
+      catalog[activeCategory].forEach((product, index) => {
+        const card = document.createElement("article");
+        card.className = `product-card glass${selectedProduct && selectedProduct.id === product.id ? " active" : ""}`;
+        card.dataset.productId = product.id;
+        card.style.animationDelay = `${index * 0.08}s`;
+        card.innerHTML = `
+          <div class="eyebrow">${categoryLabels[activeCategory]}</div>
+          <h3>${escapeHtml(product.title)}</h3>
+          <p class="muted">${escapeHtml(product.desc)}</p>
+          <div class="product-footer">
+            <span class="status-pill">Актуальную цену узнайте в чате</span>
+            <button class="btn btn-primary select-product-btn" type="button">Выбрать товар</button>
+          </div>
+        `;
+        ui.productsList.appendChild(card);
+      });
+
+      ui.productsList.querySelectorAll(".product-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          const product = findProductById(card.dataset.productId);
+          if (!product) return;
+          selectedProduct = product;
+          state.selectedProductId = product.id;
+          saveState();
+          renderSelectedProduct();
+          renderProducts();
+          showToast("Товар выбран", `${product.title} готов к оплате.`);
+        });
+      });
+
+      ui.productsList.querySelectorAll(".select-product-btn").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const card = button.closest(".product-card");
+          card?.click();
+        });
+      });
+    }
+
+    function renderSelectedProduct() {
+      if (!selectedProduct) return;
+      const category = getCategoryByProductId(selectedProduct.id);
+      ui.selectedTitle.textContent = selectedProduct.title;
+      ui.selectedDesc.textContent = selectedProduct.desc;
+      ui.selectedPrice.textContent = "Актуальную цену узнайте в чате";
+      ui.selectedCategory.textContent = shortCategoryName(category);
+      ui.selectedAvailability.textContent = "Товар выбран";
+    }
+
+    async function createOrder() {
+      if (!state.userId) {
+        showToast("Нет доступа", "Сначала введи ID на первом экране.");
+        return;
+      }
+
+      if (!selectedProduct) {
+        showToast("Нет товара", "Сначала выбери товар.");
+        return;
+      }
+
+      const orderId = `order-${Date.now()}`;
+      const detail = ui.orderNoteInput.value.trim();
+      const order = {
+        id: orderId,
+        userId: state.userId,
+        productId: selectedProduct.id,
+        productTitle: selectedProduct.title,
+        category: getCategoryByProductId(selectedProduct.id),
+        price: selectedProduct.price,
+        status: "Оплачено",
+        detail,
+        createdAt: new Date().toISOString(),
+        unreadForAdmin: true,
+        unreadForUser: false
+      };
+
+      state.orders.unshift(order);
+      state.activeOrderId = orderId;
+      if (isAdmin()) state.adminSelectedOrderId = orderId;
+      await saveOrder(order);
+      await createSystemMessages(order);
+      saveState();
+      ui.orderNoteInput.value = "";
+      hydrateHeader();
+      hydrateHome();
+      renderOrders();
+      openChat(orderId);
+      switchView("support");
+      showToast("Покупка оформлена", "Чат по заказу уже открыт.");
+    }
+
+    async function createSystemMessages(order) {
+      if (!state.messages[order.id]) state.messages[order.id] = [];
+      const systemMessage = {
+        role: "admin",
+        author: "Поддержка",
+        text: `Вы выбрали товар "${order.productTitle}". Актуальную цену вы можете узнать в этом чате у администратора. Напишите сюда детали по заказу.`,
+        createdAt: new Date().toISOString()
+      };
+      state.messages[order.id].push(systemMessage);
+      await saveMessage(order.id, systemMessage);
+
+      if (order.detail) {
+        const detailMessage = {
+          role: "user",
+          author: `Клиент ${order.userId}`,
+          text: `Детали заказа: ${order.detail}`,
+          createdAt: new Date().toISOString()
         };
+        state.messages[order.id].push(detailMessage);
+        await saveMessage(order.id, detailMessage);
+      }
+    }
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const messagesRef = ref(db, 'chat_messages');
+    function renderOrders() {
+      const orders = getVisibleOrders();
+      ui.ordersList.innerHTML = "";
+      hydrateHome();
 
-        const messagesDiv = document.getElementById('messages');
-        let selectedText = "";
+      if (!orders.length) {
+        ui.ordersList.innerHTML = `<div class="order-card"><strong>Заказов пока нет</strong><div class="order-text">После оплаты здесь появятся чаты поддержки.</div></div>`;
+        return;
+      }
 
-        // Отправка
-        document.getElementById('chat-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('msg-input');
-            if (input.value.trim()) {
-                push(messagesRef, { text: input.value, timestamp: serverTimestamp() });
-                input.value = '';
-            }
+      orders.forEach((order) => {
+        const unread = isAdmin() ? order.unreadForAdmin : order.unreadForUser;
+        const active = getCurrentChatId() === order.id;
+        const card = document.createElement("div");
+        card.className = `order-card${active ? " active" : ""}`;
+        card.innerHTML = `
+          <strong>${escapeHtml(order.productTitle)}</strong>
+          <div class="order-text">ID клиента: ${escapeHtml(order.userId)}</div>
+          <div class="order-text">Статус: ${escapeHtml(order.status)}</div>
+          <div class="order-text">Актуальную цену уточняйте в чате${unread ? " • новое сообщение" : ""}</div>
+          <div class="mini-actions">
+            <button class="btn btn-secondary" data-open-order="${order.id}">Открыть чат</button>
+          </div>
+        `;
+        ui.ordersList.appendChild(card);
+      });
+
+      ui.ordersList.querySelectorAll("[data-open-order]").forEach((button) => {
+        button.addEventListener("click", () => openChat(button.dataset.openOrder));
+      });
+    }
+
+    function openChat(orderId) {
+      if (isAdmin()) state.adminSelectedOrderId = orderId;
+      else state.activeOrderId = orderId;
+      markChatRead(orderId);
+      saveState();
+      hydrateHome();
+      renderOrders();
+      startChatSync(orderId);
+      renderCurrentChat();
+    }
+
+    function renderCurrentChat() {
+      const chatId = getCurrentChatId() || getVisibleOrders()[0]?.id || "";
+      if (chatId && !getCurrentChatId()) {
+        if (isAdmin()) state.adminSelectedOrderId = chatId;
+        else state.activeOrderId = chatId;
+        saveState();
+      }
+      if (chatId) startChatSync(chatId);
+      renderChat(chatId);
+    }
+
+    function renderChat(orderId) {
+      if (!orderId) {
+        ui.chatTitle.textContent = "Чат откроется после оплаты";
+        ui.chatStatus.textContent = "Нет активного заказа";
+        ui.chatMessages.innerHTML = `<div class="chat-note">Сначала оформи покупку, и здесь появится чат с поддержкой.</div>`;
+        return;
+      }
+
+      const order = state.orders.find((item) => item.id === orderId);
+      const messages = state.messages[orderId] || [];
+      ui.chatTitle.textContent = order ? order.productTitle : "Чат по заказу";
+      ui.chatStatus.textContent = order ? `Заказ ${order.id}` : "Активный чат";
+      ui.chatMessages.innerHTML = "";
+
+      if (!messages.length) {
+        ui.chatMessages.innerHTML = `<div class="chat-note">Сообщений пока нет.</div>`;
+        return;
+      }
+
+      messages.forEach((message) => {
+        const bubble = document.createElement("div");
+        bubble.className = `bubble ${message.role === "admin" ? "admin" : "user"}`;
+        bubble.innerHTML = `
+          <span class="bubble-meta">${formatDate(message.createdAt)} • ${escapeHtml(message.author)}</span>
+          <div>${escapeHtml(message.text)}</div>
+        `;
+        ui.chatMessages.appendChild(bubble);
+      });
+
+      ui.chatMessages.scrollTop = ui.chatMessages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      if (!state.userId) {
+        showToast("Нет входа", "Сначала введи ID.");
+        return;
+      }
+
+      const orderId = getCurrentChatId();
+      if (!orderId) {
+        showToast("Нет чата", "Сначала оформи покупку или открой заказ.");
+        return;
+      }
+
+      const text = ui.chatInput.value.trim();
+      if (!text) {
+        showToast("Пустое сообщение", "Напиши сообщение перед отправкой.");
+        return;
+      }
+
+      const order = state.orders.find((item) => item.id === orderId);
+      if (!order) return;
+
+      if (!state.messages[orderId]) state.messages[orderId] = [];
+      const message = {
+        role: isAdmin() ? "admin" : "user",
+        author: isAdmin() ? "Поддержка" : `Клиент ${state.userId}`,
+        text,
+        createdAt: new Date().toISOString()
+      };
+      state.messages[orderId].push(message);
+      await saveMessage(orderId, message);
+
+      order.unreadForAdmin = !isAdmin();
+      order.unreadForUser = isAdmin();
+      await saveOrder(order);
+      ui.chatInput.value = "";
+      saveState();
+      renderOrders();
+      renderCurrentChat();
+      showToast("Сообщение отправлено", isAdmin() ? "Ответ ушел клиенту." : "Сообщение ушло в поддержку.");
+    }
+
+    function markChatRead(orderId) {
+      const order = state.orders.find((item) => item.id === orderId);
+      if (!order) return;
+      if (isAdmin()) order.unreadForAdmin = false;
+      else order.unreadForUser = false;
+    }
+
+    function getVisibleOrders() {
+      if (isAdmin()) {
+        return [...state.orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      return state.orders
+        .filter((order) => order.userId === state.userId)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    function getCurrentChatId() {
+      return isAdmin() ? state.adminSelectedOrderId : state.activeOrderId;
+    }
+
+    function startOrdersSync() {
+      if (!state.userId || !firebaseReady) return;
+      stopOrdersSync();
+      try {
+        ordersUnsubscribe = onValue(ref(database, "orders"), (snapshot) => {
+          const data = snapshot.val() || {};
+          state.orders = Object.values(data).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          saveState();
+          hydrateHome();
+          renderOrders();
+          renderCurrentChat();
+        }, () => {
+          firebaseReady = false;
         });
+      } catch {
+        firebaseReady = false;
+      }
+    }
 
-        // Получение и логика двойного клика
-        onChildAdded(messagesRef, (snap) => {
-            const msg = document.createElement('div');
-            msg.className = 'message';
-            msg.textContent = snap.val().text;
+    function stopOrdersSync() {
+      if (ordersUnsubscribe) {
+        ordersUnsubscribe();
+        ordersUnsubscribe = null;
+      }
+      if (chatUnsubscribe) {
+        chatUnsubscribe();
+        chatUnsubscribe = null;
+      }
+    }
 
-            // ДВОЙНОЙ КЛИК (Выделение)
-            msg.addEventListener('dblclick', () => {
-                document.querySelectorAll('.message').forEach(m => m.classList.remove('selected'));
-                msg.classList.add('selected');
-                selectedText = msg.textContent;
-            });
-
-            // Для мобильных (эмуляция двойного тапа)
-            let lastTap = 0;
-            msg.addEventListener('touchend', (e) => {
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
-                if (tapLength < 300 && tapLength > 0) {
-                    msg.dispatchEvent(new Event('dblclick'));
-                }
-                lastTap = currentTime;
-            });
-
-            messagesDiv.appendChild(msg);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    function startChatSync(orderId) {
+      if (!orderId || !firebaseReady) return;
+      if (chatUnsubscribe) chatUnsubscribe();
+      try {
+        chatUnsubscribe = onValue(ref(database, `messages/${orderId}`), (snapshot) => {
+          const data = snapshot.val() || {};
+          state.messages[orderId] = Object.values(data).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          saveState();
+          renderChat(orderId);
+        }, () => {
+          firebaseReady = false;
         });
+      } catch {
+        firebaseReady = false;
+      }
+    }
 
-        // КНОПКА СКОПИРОВАТЬ
-        document.getElementById('copy-selected').addEventListener('click', () => {
-            if (selectedText) {
-                navigator.clipboard.writeText(selectedText).then(() => {
-                    const toast = document.getElementById('toast');
-                    toast.style.display = 'block';
-                    setTimeout(() => toast.style.display = 'none', 2000);
-                });
-            } else {
-                alert("Сначала нажми дважды на сообщение!");
-            }
-        });
+    async function saveOrder(order) {
+      const nextOrder = { ...order };
+      try {
+        await set(ref(database, `orders/${order.id}`), nextOrder);
+      } catch {
+        firebaseReady = false;
+      }
+    }
 
-        // ОЧИСТКА
-        document.getElementById('clear-all').addEventListener('click', () => {
-            if (confirm("Удалить всё?")) set(messagesRef, null);
-        });
+    async function saveMessage(orderId, message) {
+      try {
+        const messageRef = push(ref(database, `messages/${orderId}`));
+        await set(messageRef, message);
+      } catch {
+        firebaseReady = false;
+      }
+    }
 
-        onValue(messagesRef, (snap) => { if (!snap.exists()) messagesDiv.innerHTML = ''; });
-    </script>
+    function isAdmin() {
+      return state.userId === SECRET_ADMIN_ID;
+    }
+
+    function findProductById(productId) {
+      return Object.values(catalog).flat().find((item) => item.id === productId) || null;
+    }
+
+    function getCategoryByProductId(productId) {
+      return Object.keys(catalog).find((category) => catalog[category].some((item) => item.id === productId)) || "";
+    }
+
+    function shortCategoryName(category) {
+      return {
+        roblox: "Roblox",
+        pubg: "PUBG",
+        standoff: "Standoff 2",
+        telegram: "Telegram"
+      }[category] || "Категория";
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return {
+          userId: saved?.userId || "",
+          activeCategory: saved?.activeCategory || "roblox",
+          selectedProductId: saved?.selectedProductId || "rbx-1",
+          activeOrderId: saved?.activeOrderId || "",
+          adminSelectedOrderId: saved?.adminSelectedOrderId || "",
+          orders: Array.isArray(saved?.orders) ? saved.orders : [],
+          messages: saved?.messages && typeof saved.messages === "object" ? saved.messages : {}
+        };
+      } catch {
+        return {
+          userId: "",
+          activeCategory: "roblox",
+          selectedProductId: "rbx-1",
+          activeOrderId: "",
+          adminSelectedOrderId: "",
+          orders: [],
+          messages: {}
+        };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function formatPrice(value) {
+      return new Intl.NumberFormat("ru-RU", {
+        style: "currency",
+        currency: "UZS",
+        maximumFractionDigits: 0
+      }).format(Number(value || 0));
+    }
+
+    function formatDate(value) {
+      return new Intl.DateTimeFormat("ru-RU", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(new Date(value));
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showToast(title, text) {
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerHTML = `<strong>${escapeHtml(title)}</strong><div style="margin-top:6px; color: var(--muted);">${escapeHtml(text)}</div>`;
+      ui.toastWrap.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add("toast-hide");
+        setTimeout(() => toast.remove(), 420);
+      }, 2800);
+    }
+  </script>
 </body>
 </html>
